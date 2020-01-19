@@ -1,58 +1,55 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
-
-import { reviews } from "./Data.js";
+import MediaItem from "./MediaItem.jsx";
+import { connect } from "react-redux";
 
 class ItemDetails extends Component {
-  addToShoppingList = () => {
-    this.props.addToShoppingList(this.props.item);
+  addtoShoppingList = () => {
+    this.props.dispatch({
+      type: "add-shoppinglist",
+      content: this.props.contents
+    });
   };
 
   render() {
-    let reviewsforitem = reviews.filter(review => {
-      return review.itemId === this.props.item.id;
-    });
-
-    let reviewdetails = "";
-
-    reviewdetails =
-      reviewsforitem.length === 0 ? (
-        <div>No reviews for this item.</div>
-      ) : (
-        reviewsforitem.map(review => {
-          return (
-            <div>
-              <div>{review.contents}</div>
-              <Link to={"/reviewer/" + review.reviewer}>
-                {" "}
-                From {review.reviewer}{" "}
-              </Link>
-            </div>
-          );
-        })
-      );
-
+    const {
+      description,
+      price,
+      inventory,
+      location,
+      seller,
+      frontendPaths
+    } = this.props.contents;
     return (
-      <div>
-        <div className="card center ">
-          <img height="100px" src={this.props.item.image} />
-          <div>
-            <div>{"Inventory: " + this.props.item.inventory}</div>
-            {/* <button type="button" onClick={this.addToShoppingList}> */}
-            <button
-              type="button"
-              onClick={() => {
-                this.addToShoppingList();
-              }}
-            >
-              Add to cart
-            </button>
-            <h3>Reviews for this item</h3>
-            {reviewdetails}
-          </div>
+      <div className="card center ">
+        <div>
+          {Object.keys(this.props.contents.frontendPaths).map((obj, i) => {
+            return (
+              <div>
+                {obj} - {frontendPaths[obj]}
+                <MediaItem mid={frontendPaths[obj]} />
+              </div>
+            );
+          })}
+        </div>
+        <div>
+          <div>Description: {description}</div>
+          <div>Price: {price} $</div>
+          <div>Inventory: {inventory}</div>
+          <div>Location: {location}</div>
+          <div>Seller: {seller}</div>
+        </div>
+        <div>
+          <button type="button" onClick={this.addtoShoppingList}>
+            Add to cart
+          </button>
         </div>
       </div>
     );
   }
 }
-export default ItemDetails;
+let mapStateToProps = state => {
+  return {
+    shoppingList: state.shoppingList
+  };
+};
+export default connect(mapStateToProps)(ItemDetails);

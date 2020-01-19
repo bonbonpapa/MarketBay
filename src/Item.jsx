@@ -1,19 +1,39 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import MediaItem from "./MediaItem.jsx";
 
 class Item extends Component {
   render() {
+    const {
+      description,
+      price,
+      inventory,
+      location,
+      seller,
+      frontendPaths
+    } = this.props.contents;
     return (
       <div className="card center ">
-        <img height="100px" src={this.props.imageLocation} />
         <div>
-          <div>{"Description: " + this.props.description}</div>
-          <div>{"Price: " + this.props.cost + "$"}</div>
+          {Object.keys(this.props.contents.frontendPaths).map((obj, i) => {
+            return (
+              <div>
+                {obj} - {frontendPaths[obj]}
+                <MediaItem mid={frontendPaths[obj]} />
+              </div>
+            );
+          })}
+        </div>
+        <div>
+          <div>Description: {description}</div>
+          <div>Price: {price} $</div>
+          <div>Inventory: {inventory}</div>
+          <div>Location: {location}</div>
+          <div>Seller: {seller}</div>
           <div>
-            <Link to={"/seller/" + this.props.sellerId}> Link to seller </Link>
-          </div>
-          <div>
-            <Link to={"/details/" + this.props.itemId}> Link to details </Link>
+            <Link to={"/details/" + this.props.contents._id}>
+              Link to details
+            </Link>
           </div>
         </div>
       </div>

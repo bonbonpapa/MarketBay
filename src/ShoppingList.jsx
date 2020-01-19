@@ -1,22 +1,26 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import ItemInCart from "./ItemInCart.jsx";
+import { connect } from "react-redux";
 
 class ShoppingList extends Component {
-  OnCheckoutItems = () => {
-    this.props.setHistory(this.props.list);
-    this.props.clearList();
+  OnCheckoutItems = () => {};
+  DeletefromShoppingList = idx => {
+    this.props.dispatch({ type: "delete-from-list", content: idx });
   };
 
   render() {
     return (
       <div className="card center ">
-        {this.props.list.map(item => (
-          <ItemInCart
-            item={item}
-            deleteItemInCart={this.props.deletefromList}
-          />
-        ))}
+        <ul>
+          {this.props.shoppingList.map((item, idx) => (
+            <li>
+              <Link to={"/details/" + item._id}>{item.description}</Link>
+              <button onClick={() => this.DeletefromShoppingList(idx)}>
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
         <button type="button" onClick={this.OnCheckoutItems}>
           Confirm order
         </button>
@@ -27,4 +31,9 @@ class ShoppingList extends Component {
     );
   }
 }
-export default ShoppingList;
+let mapStateToProps = state => {
+  return {
+    shoppingList: state.shoppingList
+  };
+};
+export default connect(mapStateToProps)(ShoppingList);

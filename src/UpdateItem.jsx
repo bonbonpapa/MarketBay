@@ -1,44 +1,52 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 
 class UpdateItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      id: "",
       description: "",
       price: "",
       inventory: "",
-      image: "",
-      sellerId: this.props.sellerId
+      location: "",
+      files: []
     };
   }
 
   InitialState = () => {
     this.setState({
-      id: "",
       description: "",
       price: "",
       inventory: "",
-      image: ""
+      location: "",
+      files: []
     });
   };
-  handleSubmit = event => {
+  handleSubmit = async event => {
     event.preventDefault();
-    const item = {
-      id: this.state.id,
-      description: this.state.description,
-      price: this.state.price,
-      inventory: this.state.inventory,
-      image: this.state.image,
-      sellerId: this.state.sellerId
-    };
-    this.props.updateItem(item);
+    let data = new FormData();
+    debugger;
+    for (let i = 0; i < this.state.files.length; i++) {
+      data.append("mfiles", this.state.files[i]);
+    }
+    data.append("description", this.state.description);
+    data.append("price", this.state.price);
+    data.append("location", this.state.location);
+    data.append("inventory", this.state.inventory);
+    data.append("seller", this.props.username);
+    console.log("the  to the server", data);
 
-    this.InitialState();
+    let response = await fetch("/new-item", { method: "POST", body: data });
+    let body = await response.text();
+    body = JSON.parse(body);
+    if (body.success) {
+      alert("Item added successfully");
+      this.InitialState();
+      return;
+    }
+    alert("items added failed");
   };
-  updateID = event => {
-    this.setState({ id: event.target.value });
-  };
+
   updateDesc = event => {
     this.setState({ description: event.target.value });
   };
@@ -48,31 +56,17 @@ class UpdateItem extends Component {
   updateInventory = event => {
     this.setState({ inventory: event.target.value });
   };
+  locationHandler = event => {
+    this.setState({ location: event.target.value });
+  };
   handleImageChange = event => {
-    event.preventDefault();
-
-    let reader = new FileReader();
-    let file = event.target.files[0];
-
-    reader.onloadend = () => {
-      this.setState({
-        image: reader.result
-      });
-    };
-
-    reader.readAsDataURL(file);
-
-    // get the code for image handling from stack flow post
+    this.setState({ files: event.target.files });
   };
 
   render() {
     return (
       <div className="card center ">
         <form onSubmit={this.handleSubmit}>
-          <div>
-            Item ID:
-            <input type="text" value={this.state.id} onChange={this.updateID} />
-          </div>
           <div>
             Description:
             <input
@@ -98,10 +92,19 @@ class UpdateItem extends Component {
             />
           </div>
           <div>
+            Location:
+            <input
+              type="text"
+              value={this.state.location}
+              onChange={this.locationHandler}
+            />
+          </div>
+          <div>
             Image:
             <input
               type="file"
-              onChange={event => this.handleImageChange(event)}
+              multiple="multiple"
+              onChange={this.handleImageChange}
             />
           </div>
           <input type="submit" />
@@ -110,4 +113,9 @@ class UpdateItem extends Component {
     );
   }
 }
-export default UpdateItem;
+let mapStateToProps = state => {
+  return {
+    username: state.username
+  };
+};
+export default connect(mapStateToProps)(UpdateItem);

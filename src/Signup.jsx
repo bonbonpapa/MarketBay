@@ -29,7 +29,8 @@ class Signup extends Component {
     let body = JSON.parse(responseBody);
     if (!body.success) alert(body.error);
     this.props.dispatch({
-      type: "login-success"
+      type: "login-success",
+      content: this.state.username
     });
   };
   render = () => {
