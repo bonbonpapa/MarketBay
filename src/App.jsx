@@ -49,12 +49,10 @@ class App extends Component {
   };
 
   renderProfile = () => {
-    return <Profile historyList={this.state.shoppingHistory} />;
+    return <Profile />;
   };
   renderPay = () => {
-    return (
-      <Pay list={this.state.shoppingList} payinfo={this.updatePaymentInfo} />
-    );
+    return <Pay />;
   };
   renderUpdateItem = () => {
     return <UpdateItem />;

@@ -14,6 +14,12 @@ let reducer = (state, action) => {
       shoppingList: state.shoppingList.concat(action.content)
     };
   }
+  if (action.type === "set-items-bought") {
+    return {
+      ...state,
+      shoppingHistory: state.shoppingHistory.concat(state.shoppingList)
+    };
+  }
 
   if (action.type === "clear-shoppinglist") {
     return {

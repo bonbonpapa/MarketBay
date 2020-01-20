@@ -1,4 +1,5 @@
-import React, { Component } from 'react'; 
+import React, { Component } from "react";
+import { connect } from "react-redux";
 
 class Pay extends Component {
   constructor(props) {
@@ -13,13 +14,17 @@ class Pay extends Component {
 
   handleSubmit = event => {
     event.preventDefault();
-    const payinfo = {
-      cardnumber: this.state.cardnumber,
-      cvv: this.state.cvv,
-      expdata: this.state.expdata,
-      shippingAddress: this.state.shippingAddress
-    };
-    this.props.payinfo(payinfo);
+    alert(
+      `${this.state.cardnumber} - ${this.state.expdata} - ${this.state.cvv}- ${this.state.shippingAddress}`
+    );
+    this.setState({
+      cardnumber: "",
+      cvv: "",
+      expdata: "",
+      shippingAddress: ""
+    });
+    this.props.dispatch({ type: "set-items-bought" });
+    this.props.dispatch({ type: "clear-shoppinglist" });
   };
   updateCardNumber = event => {
     this.setState({ cardnumber: event.target.value });
@@ -37,40 +42,43 @@ class Pay extends Component {
     return (
       <div className="card center ">
         <form onSubmit={this.handleSubmit}>
-        <div>
-        Card Number: 
-        <input
-            type='text' value = {this.state.cardnumber}
-            onChange = {this.updateCardNumber}
-          />
-        </div>
-        <div>
-        CVV: 
-        <input
-            type='text' value = {this.state.cvv}
-            onChange = {this.updateCVV}
-          />
-        </div> 
-        <div>
-        Expire Date:  
-        <input
-            type='text' value = {this.state.expdata}
-            onChange = {this.updateExpDate}
-          />
-        </div> 
-        <div>
-        Shipping Address:       
-        <input
-            type='text' value = {this.state.shippingAddress}
-            onChange = {this.updateAddress}
-          />
-        </div>
-          
-          
-          <input type= 'submit'/>
+          <div>
+            Card Number:
+            <input
+              type="text"
+              value={this.state.cardnumber}
+              onChange={this.updateCardNumber}
+            />
+          </div>
+          <div>
+            CVV:
+            <input
+              type="text"
+              value={this.state.cvv}
+              onChange={this.updateCVV}
+            />
+          </div>
+          <div>
+            Expire Date:
+            <input
+              type="text"
+              value={this.state.expdata}
+              onChange={this.updateExpDate}
+            />
+          </div>
+          <div>
+            Shipping Address:
+            <input
+              type="text"
+              value={this.state.shippingAddress}
+              onChange={this.updateAddress}
+            />
+          </div>
+
+          <input type="submit" />
         </form>
       </div>
     );
   }
-} 
-export default Pay; 
+}
+export default connect()(Pay);

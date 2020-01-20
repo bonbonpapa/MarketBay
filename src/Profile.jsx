@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-
+import { connect } from "react-redux";
 class Profile extends Component {
   render() {
     return (
       <div className="card center ">
         <ul>
-          {this.props.historyList.map(item => {
+          {this.props.shoppingHistory.map(item => {
             return <li>{"Description: " + item.description}</li>;
           })}
         </ul>
@@ -13,4 +13,9 @@ class Profile extends Component {
     );
   }
 }
-export default Profile;
+let mapStateToProps = state => {
+  return {
+    shoppingHistory: state.shoppingHistory
+  };
+};
+export default connect(mapStateToProps)(Profile);
