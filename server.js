@@ -154,6 +154,22 @@ app.get("/getmedia", (req, res) => {
     res.send(JSON.stringify({ success: true, mpath: mpath }));
   });
 });
+
+app.post("/order", upload.none(), (req, res) => {
+  console.log("require to the order", req.body);
+  const items = req.body.items;
+  const shippingAddress = req.body.shippingAddress;
+  const card = req.body.card;
+  const username = req.body.username;
+
+  dbo.collection("orders").insertOne({
+    items,
+    shippingAddress,
+    username,
+    card
+  });
+  res.send(JSON.stringify({ success: true }));
+});
 // Your endpoints go before this line
 
 app.all("/*", (req, res, next) => {

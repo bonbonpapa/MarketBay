@@ -17,7 +17,7 @@ let reducer = (state, action) => {
   if (action.type === "set-items-bought") {
     return {
       ...state,
-      shoppingHistory: state.shoppingHistory.concat(state.shoppingList)
+      shoppingHistory: state.shoppingHistory.concat(action.content)
     };
   }
 
@@ -35,6 +35,56 @@ let reducer = (state, action) => {
       shoppingList: cartCopy
     };
   }
+  if (action.type === "init-card") {
+    const cardinit = { cardnumber: "", cvv: "", expdate: "" };
+    return {
+      ...state,
+      card: cardinit
+    };
+  }
+  if (action.type === "set-card") {
+    return {
+      ...state,
+      card: action.content
+    };
+  }
+  if (action.type === "set-shippingaddress") {
+    return {
+      ...state,
+      shippingAddress: action.content
+    };
+  }
+  if (action.type === "clear-shippingAddress") {
+    return {
+      ...state,
+      shippingAddress: ""
+    };
+  }
+  if (action.type === "set-cardnumber") {
+    const cardCopy = { ...state.card };
+    cardCopy["cardnumber"] === action.content;
+    return {
+      ...state,
+      card: cardCopy
+    };
+  }
+  if (action.type === "set-cvv") {
+    const cardCopy = { ...state.card };
+    cardCopy["cvv"] === action.content;
+    return {
+      ...state,
+      card: cardCopy
+    };
+  }
+  if (action.type === "set-expdate") {
+    const cardCopy = { ...state.card };
+    cardCopy["expdate"] === action.content;
+    return {
+      ...state,
+      card: cardCopy
+    };
+  }
+
   return state;
 };
 const store = createStore(
@@ -45,7 +95,8 @@ const store = createStore(
     items: [],
     shoppingList: [],
     shoppingHistory: [],
-    paymentInfo: {}
+    shippingAddress: "",
+    card: null
   },
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
