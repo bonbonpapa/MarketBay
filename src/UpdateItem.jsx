@@ -25,7 +25,6 @@ class UpdateItem extends Component {
   handleSubmit = async event => {
     event.preventDefault();
     let data = new FormData();
-    debugger;
     for (let i = 0; i < this.state.files.length; i++) {
       data.append("mfiles", this.state.files[i]);
     }

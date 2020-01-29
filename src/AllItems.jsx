@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import Item from "./Item.jsx";
 import { connect } from "react-redux";
+import styled from "styled-components";
+
+const Main = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  grid-gap: 10px;
+`;
+
 class AllItems extends Component {
   constructor(props) {
     super(props);
@@ -20,14 +28,11 @@ class AllItems extends Component {
 
   render = () => {
     return (
-      <div>
-        <button onClick={this.reload}> load </button>
-        <div>
-          {this.props.items.map(item => (
-            <Item key={item._id} contents={item} />
-          ))}
-        </div>
-      </div>
+      <Main>
+        {this.props.items.map(item => (
+          <Item key={item._id} contents={item} />
+        ))}
+      </Main>
     );
   };
 }

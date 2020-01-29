@@ -1,42 +1,34 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import MediaItem from "./MediaItem.jsx";
+import styled from "styled-components";
+import Card from "@material-ui/core/Card";
+
+const ItemCard = styled(Card)`
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
 
 class Item extends Component {
   render() {
-    const {
-      description,
-      price,
-      inventory,
-      location,
-      seller,
-      frontendPaths
-    } = this.props.contents;
+    const { description, price, defaultPaths } = this.props.contents;
     return (
-      <div className="card center ">
+      <ItemCard>
         <div>
-          {Object.keys(this.props.contents.frontendPaths).map((obj, i) => {
-            return (
-              <div>
-                {obj} - {frontendPaths[obj]}
-                <MediaItem mid={frontendPaths[obj]} />
-              </div>
-            );
-          })}
+          <img src={defaultPaths.frontendPath} />
         </div>
         <div>
-          <div>Description: {description}</div>
-          <div>Price: {price} $</div>
-          <div>Inventory: {inventory}</div>
-          <div>Location: {location}</div>
-          <div>Seller: {seller}</div>
+          <div>{description}</div>
+          <div>{price} $</div>
           <div>
             <Link to={"/details/" + this.props.contents._id}>
               Link to details
             </Link>
           </div>
         </div>
-      </div>
+      </ItemCard>
     );
   }
 }

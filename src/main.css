@@ -3,30 +3,6 @@ body {
   margin: 0;
 }
 
-.overlay {
-  z-index: 50;
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.popup {
-  z-index: 100;
-  position: fixed;
-  top: 200px;
-  left: 200px;
-  right: 200px;
-  background-color: white;
-}
-body {
-  background: #c5ddeb;
-  font: 14px/20px "Lato", Arial, sans-serif;
-  padding: 40px 0;
-  color: white;
-}
 .signform {
   background: #f2f5f8;
   color: #434651;
@@ -35,40 +11,6 @@ body {
   margin: 0 auto 0 auto;
   padding: 0px 0px 70px 0px;
   border: #2980b9 4px solid;
-}
-
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
-}
-
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .card {
@@ -92,4 +34,51 @@ body {
   width: 50%;
   border: 3px solid green;
   padding: 10px;
+}
+
+.center-text {
+  text-align: center;
+}
+
+.btn {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 4px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  margin-bottom: 20px;
+  background: #4caf50;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.nav-right > *:not(:last-child) {
+  margin-right: 10px;
+}
+
+.cart {
+  position: relative;
+}
+
+.cart > span {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: #fff;
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

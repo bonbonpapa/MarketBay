@@ -23,12 +23,7 @@ class ItemDetails extends Component {
       <div className="card center ">
         <div>
           {Object.keys(this.props.contents.frontendPaths).map((obj, i) => {
-            return (
-              <div>
-                {obj} - {frontendPaths[obj]}
-                <MediaItem mid={frontendPaths[obj]} />
-              </div>
-            );
+            return <MediaItem key={i} mid={frontendPaths[obj]} />;
           })}
         </div>
         <div>

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import styled from "styled-components";
 import { Route, BrowserRouter, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import AllItems from "./AllItems.jsx";
@@ -7,20 +8,42 @@ import Profile from "./Profile.jsx";
 import Pay from "./Pay.jsx";
 import ShoppingList from "./ShoppingList.jsx";
 import UpdateItem from "./UpdateItem.jsx";
-
+import Navbar from "./Navbar.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
+import SignInSide from "./SignInSide.js";
+import { toast } from "react-toastify";
+
+toast.configure();
+
+const Wrapper = styled.div`
+  display: grid;
+  grid-template-rows: 100px 1fr;
+`;
 
 class App extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      loading: false
+    };
   }
+  componentDidMount() {
+    this.fetchSession();
+  }
+  fetchSession = async () => {
+    this.setState({ loading: true });
+
+    const response = await fetch("/session");
+    const body = await response.text();
+    const parsed = JSON.parse(body);
+    if (parsed.success) {
+      this.props.dispatch({ type: "login-success", content: parsed.username });
+    }
+    this.setState({ loading: false });
+  };
   renderAllItems = () => {
-    return (
-      <div>
-        <AllItems />
-      </div>
-    );
+    return <AllItems />;
   };
   renderItemDetails = rd => {
     let itemId = rd.match.params.itemId;
@@ -62,19 +85,8 @@ class App extends Component {
     if (this.props.lgin) {
       return (
         <BrowserRouter>
-          <div>
-            <div>
-              <Link to={"/"}>My home page </Link>
-            </div>
-            <div>
-              <Link to={"/shoppingcart"}> Link to shopping cart </Link>
-            </div>
-            <div>
-              <Link to={"/profile"}> Link to profile cart </Link>
-            </div>
-            <div>
-              <Link to={"/updateItems/"}>Update selling items</Link>
-            </div>
+          <Wrapper>
+            <Navbar />
             <Route exact={true} path="/" render={this.renderAllItems} />
             <Route
               exact={true}
@@ -93,16 +105,19 @@ class App extends Component {
               path="/details/:itemId"
               render={this.renderItemDetails}
             />
-          </div>
+          </Wrapper>
         </BrowserRouter>
       );
     }
     return (
-      <div className="signform">
-        <h1>Signup</h1>
-        <Signup />
-        <h1>Login</h1>
-        <Login />
+      // <div className="signform">
+      //   <h1>Signup</h1>
+      //   <Signup />
+      //   <h1>Login</h1>
+      //   <Login />
+      // </div>
+      <div>
+        <SignInSide />
       </div>
     );
   };

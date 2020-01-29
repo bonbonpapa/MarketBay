@@ -1,4 +1,7 @@
 let express = require("express");
+const stripe = require("stripe")("sk_test_rZR28FL1Dt5b68vcM0YzEHSt00dPZJ8Cxp");
+const uuid = require("uuid/v4");
+const cors = require("cors");
 const multer = require("multer");
 let upload = multer({
   dest: __dirname + "/uploads/"
@@ -19,6 +22,7 @@ reloadMagic(app);
 app.use("/", express.static("build")); // Needed for the HTML and JS files
 app.use("/", express.static("public")); // Needed for local assets
 app.use("/uploads", express.static("uploads"));
+app.use(express.json());
 
 let dbo = undefined;
 let url =
@@ -29,6 +33,14 @@ MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 
 // Your endpoints go after this line
 
+app.get("/session", (req, res) => {
+  const sessionId = req.cookies.sid;
+  const username = sessions[sessionId];
+  if (username) {
+    return res.send(JSON.stringify({ success: true, username }));
+  }
+  res.send(JSON.stringify({ success: false }));
+});
 app.post("/signup", upload.none(), (req, res) => {
   console.log("**** I'm in the signup endpoint");
   console.log("this is the body", req.body);
@@ -45,6 +57,7 @@ app.post("/signup", upload.none(), (req, res) => {
       res.send(JSON.stringify({ success: false, message: "username takend" }));
       return;
     }
+
     dbo
       .collection("users")
       .insertOne({ username: username, password: enteredPassword })
@@ -109,12 +122,14 @@ app.post("/new-item", upload.array("mfiles", 9), async (req, res) => {
   let inventory = req.body.inventory;
   let location = req.body.location;
   let seller = req.body.seller;
+  let defaultPaths = frontendPaths[0];
   dbo.collection("items").insertOne({
     description,
     price,
     inventory,
     location,
     seller,
+    defaultPaths,
     frontendPaths: insertReturn.insertedIds
   });
   res.send(JSON.stringify({ success: true }));
@@ -169,6 +184,55 @@ app.post("/order", upload.none(), (req, res) => {
     card
   });
   res.send(JSON.stringify({ success: true }));
+});
+
+app.post("/checkout", cors(), async (req, res) => {
+  console.log("Request:", req.body);
+  let error;
+  let status = "";
+
+  try {
+    const { product, token } = req.body;
+    //const product = req.body.product;
+    console.log("Product information from frontend, ", product);
+    //const token = req.body.token;
+    console.log("Token for payment, ", token);
+    const customer = await stripe.customers.create({
+      email: token.email,
+      source: token.id
+    });
+
+    const idempotencyKey = uuid();
+    const charge = await stripe.charges.create(
+      {
+        amount: product.price * 100,
+        currency: "usd",
+        customer: customer.id,
+        receipt_email: token.email,
+        description: product.name,
+        shipping: {
+          name: token.card.name,
+          address: {
+            line1: token.card.address_line1,
+            line2: token.card.address_line2,
+            city: token.card.address_city,
+            country: token.card.address_country,
+            postal_code: token.card.address_zip
+          }
+        }
+      },
+      { idempotencyKey }
+    );
+
+    console.log("Charged:", { charge });
+    status = "success";
+    //res.send(JSON.stringify({ success: true }));
+  } catch (error) {
+    console.log("Error:", error);
+    status = "failure";
+    //res.send(JSON.stringify({ success: false, error }));
+  }
+  res.json({ error, status });
 });
 // Your endpoints go before this line
 
