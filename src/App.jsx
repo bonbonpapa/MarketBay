@@ -12,9 +12,8 @@ import Navbar from "./Navbar.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
 import SignInSide from "./SignInSide.js";
-import { toast } from "react-toastify";
-
-toast.configure();
+import SellSide from "./SellSide.js";
+import Cart from "./Cart.js";
 
 const Wrapper = styled.div`
   display: grid;
@@ -61,14 +60,10 @@ class App extends Component {
       shoppingHistory: this.state.shoppingHistory.concat(list)
     });
   };
-  updatePaymentInfo = cardinfo => {
-    this.setState({
-      paymentInfo: cardinfo
-    });
-  };
 
   renderShoppingCart = () => {
-    return <ShoppingList />;
+    //  return <ShoppingList />;
+    return <Cart />;
   };
 
   renderProfile = () => {
@@ -78,7 +73,8 @@ class App extends Component {
     return <Pay />;
   };
   renderUpdateItem = () => {
-    return <UpdateItem />;
+    // return <UpdateItem />;
+    return <SellSide />;
   };
 
   render = () => {

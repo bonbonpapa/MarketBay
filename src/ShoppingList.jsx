@@ -65,7 +65,7 @@ class ShoppingList extends Component {
 
   render() {
     return (
-      <div className="card center ">
+      <div>
         <ul>
           {this.props.shoppingList.map((item, idx) => {
             return (

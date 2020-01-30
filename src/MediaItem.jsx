@@ -1,4 +1,13 @@
 import React, { Component } from "react";
+import styled from "styled-components";
+
+const Wrapper = styled.div`
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
 
 class MediaItem extends Component {
   constructor(props) {
@@ -26,26 +35,20 @@ class MediaItem extends Component {
 
     if (filetype === "image/jpeg") {
       return (
-        <div>
-          <form>
-            <img
-              src={this.state.mpath.frontendPath}
-              width="200px"
-              height="200px"
-            />
-          </form>
-        </div>
+        <Wrapper>
+          <img src={this.state.mpath.frontendPath} />
+        </Wrapper>
       );
     }
     if (filetype === "audio/mp3") {
       return (
-        <div>
+        <Wrapper>
           <audio
             controls
             src={this.state.mpath.frontendPath}
             type={filetype}
           ></audio>
-        </div>
+        </Wrapper>
       );
     }
     return <div>unknown file format</div>;

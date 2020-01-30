@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 class Profile extends Component {
   render() {
     return (
-      <div className="card center ">
+      <div>
         <ul>
           {this.props.shoppingHistory.map(item => {
             return <li>{"Description: " + item.description}</li>;
