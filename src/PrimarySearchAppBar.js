@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -13,12 +14,18 @@ import SearchIcon from "@material-ui/icons/Search";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import MailIcon from "@material-ui/icons/Mail";
 import NotificationsIcon from "@material-ui/icons/Notifications";
+import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
 import MoreIcon from "@material-ui/icons/MoreVert";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 const NavbarLink = styled(Link)`
   color: #fff;
+  text-decoration: none;
+  font-size: 1.25rem;
+`;
+const MenuLink = styled(Link)`
+  color: black;
   text-decoration: none;
 `;
 
@@ -70,6 +77,9 @@ const useStyles = makeStyles(theme => ({
       width: 200
     }
   },
+  cartIcon: {
+    paddingTop: 5
+  },
   sectionDesktop: {
     display: "none",
     [theme.breakpoints.up("md")]: {
@@ -86,8 +96,11 @@ const useStyles = makeStyles(theme => ({
 
 export default function PrimarySearchAppBar() {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const query = useSelector(state => state.searchQuery);
+  const shoppingListCount = useSelector(state => state.shoppingList.length);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -109,6 +122,10 @@ export default function PrimarySearchAppBar() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+  const handleQuery = event => {
+    dispatch({ type: "query", content: event.target.value });
+  };
+
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
@@ -120,7 +137,9 @@ export default function PrimarySearchAppBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+        <MenuLink to="/profile">Profile</MenuLink>
+      </MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
     </Menu>
   );
@@ -179,7 +198,7 @@ export default function PrimarySearchAppBar() {
             <MenuIcon />
           </IconButton>
           <Typography className={classes.title} variant="h6" noWrap>
-            EASY BAY
+            <NavbarLink to="/">EASY BAY</NavbarLink>
           </Typography>
           <div className={classes.search}>
             <div className={classes.searchIcon}>
@@ -192,18 +211,22 @@ export default function PrimarySearchAppBar() {
                 input: classes.inputInput
               }}
               inputProps={{ "aria-label": "search" }}
+              onChange={handleQuery}
+              value={query}
             />
           </div>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
-            <IconButton aria-label="show 4 new mails" color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <MailIcon />
-              </Badge>
+            <IconButton aria-label="sell items" color="inherit">
+              <NavbarLink to="/updateItems">SELL</NavbarLink>
             </IconButton>
-            <IconButton aria-label="show 17 new notifications" color="inherit">
-              <Badge badgeContent={17} color="secondary">
-                <NotificationsIcon />
+            <IconButton aria-label="show cart content" color="inherit">
+              <Badge badgeContent={shoppingListCount} color="secondary">
+                <NavbarLink to="/shoppingcart">
+                  <div className={classes.cartIcon}>
+                    <ShoppingCartIcon />
+                  </div>
+                </NavbarLink>
               </Badge>
             </IconButton>
             <IconButton

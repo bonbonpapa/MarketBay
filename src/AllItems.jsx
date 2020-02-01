@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 const Main = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: repeat(4, 1fr);
   grid-gap: 10px;
 `;
 
@@ -27,9 +27,12 @@ class AllItems extends Component {
   };
 
   render = () => {
+    let results = this.props.items.filter(item => {
+      return item.description.includes(this.props.searchQuery);
+    });
     return (
       <Main>
-        {this.props.items.map(item => (
+        {results.map(item => (
           <Item key={item._id} contents={item} />
         ))}
       </Main>
@@ -39,7 +42,8 @@ class AllItems extends Component {
 let mapStateToProps = state => {
   return {
     username: state.username,
-    items: state.items
+    items: state.items,
+    searchQuery: state.searchQuery
   };
 };
 export default connect(mapStateToProps)(AllItems);

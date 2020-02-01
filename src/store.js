@@ -84,6 +84,12 @@ let reducer = (state, action) => {
       card: cardCopy
     };
   }
+  if (action.type === "query") {
+    return {
+      ...state,
+      searchQuery: action.content
+    };
+  }
 
   return state;
 };
@@ -96,6 +102,7 @@ const store = createStore(
     shoppingList: [],
     shoppingHistory: [],
     shippingAddress: "",
+    searchQuery: "",
     card: null
   },
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
