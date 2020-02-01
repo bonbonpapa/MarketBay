@@ -14,6 +14,8 @@ import Signup from "./Signup.jsx";
 import SignInSide from "./SignInSide.js";
 import SellSide from "./SellSide.js";
 import Cart from "./Cart.js";
+import Purchased from "./Purchased.js";
+import PrimarySearchAppBar from "./PrimarySearchAppBar.js";
 
 const Wrapper = styled.div`
   display: grid;
@@ -67,7 +69,8 @@ class App extends Component {
   };
 
   renderProfile = () => {
-    return <Profile />;
+    // return <Profile />;
+    return <Purchased />;
   };
   renderPay = () => {
     return <Pay />;
@@ -82,7 +85,8 @@ class App extends Component {
       return (
         <BrowserRouter>
           <Wrapper>
-            <Navbar />
+            {/* <Navbar /> */}
+            <PrimarySearchAppBar />
             <Route exact={true} path="/" render={this.renderAllItems} />
             <Route
               exact={true}

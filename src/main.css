@@ -3,27 +3,6 @@ body {
   margin: 0;
 }
 
-.signform {
-  background: #f2f5f8;
-  color: #434651;
-  width: 500px;
-  border-radius: 6px;
-  margin: 0 auto 0 auto;
-  padding: 0px 0px 70px 0px;
-  border: #2980b9 4px solid;
-}
-
-.card {
-  /* Add shadows to create the "card" effect */
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  transition: 0.3s;
-}
-
-/* On mouse-over, add a deeper shadow */
-.card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-}
-
 /* Add some padding inside the card container */
 .container {
   padding: 2px 16px;

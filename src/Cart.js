@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import Paper from "@material-ui/core/Paper";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-import Grid from "@material-ui/core/Grid";
 import axios from "axios";
 import StripeCheckout from "react-stripe-checkout";
 
@@ -45,17 +44,16 @@ const useStyles = makeStyles(theme => ({
 export default function Cart() {
   const classes = useStyles();
 
-  const [name, SetName] = useState("");
-  const [price, SetPrice] = useState(0.0);
+  const [product] = useState({
+    name: "new order",
+    price: 34.07
+  });
+  const dispatch = useDispatch();
 
   const shoppingList = useSelector(state => state.shoppingList);
 
   async function handleToken(token) {
     console.log({ token });
-    let product = {
-      name,
-      price
-    };
 
     const response = await axios.post("/checkout", {
       token,
@@ -65,6 +63,11 @@ export default function Cart() {
 
     if (status === "success") {
       alert("Success! check emails for details!");
+      dispatch({
+        type: "set-items-bought",
+        content: shoppingList
+      });
+      dispatch({ type: "clear-shoppinglist" });
     } else {
       alert("Something went wrong!");
     }

@@ -13,7 +13,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(theme => ({
   root: {
-    height: "100vh"
+    height: "85vh"
   },
   image: {
     backgroundImage: "url(https://source.unsplash.com/random)",
@@ -85,7 +85,7 @@ export default function SellSide() {
 
   return (
     <Grid container component="main" className={classes.root}>
-      <CssBaseline />
+      {/* <CssBaseline /> */}
       <Grid item xs={false} sm={4} md={7} className={classes.image} />
       <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
         <div className={classes.paper}>

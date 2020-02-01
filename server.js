@@ -146,7 +146,7 @@ app.get("/all-items", (req, res) => {
         res.send(JSON.stringify({ success: false }));
         return;
       }
-      console.log("Items", items);
+      // console.log("Items", items);
       res.send(JSON.stringify({ success: true, items: items }));
     });
 });
@@ -233,6 +233,29 @@ app.post("/checkout", cors(), async (req, res) => {
     //res.send(JSON.stringify({ success: false, error }));
   }
   res.json({ error, status });
+});
+
+app.get("/get-orders", (req, res) => {
+  console.log("request to the get media");
+  const username = req.query.username;
+  console.log("username", username);
+
+  dbo
+    .collection("orders")
+    .find({ username: username })
+    .toArray((err, orders) => {
+      if (err) {
+        console.log("/get orders", err);
+        res.send(JSON.stringify({ success: false }));
+        return;
+      }
+      if (orders === null) {
+        res.send(JSON.stringify({ success: false }));
+        return;
+      }
+      console.log("Orders object", orders);
+      res.send(JSON.stringify({ success: true, data: orders }));
+    });
 });
 // Your endpoints go before this line
 
