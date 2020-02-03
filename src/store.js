@@ -3,7 +3,12 @@ import { createStore } from "redux";
 
 let reducer = (state, action) => {
   if (action.type === "login-success") {
-    return { ...state, loggedIn: true, username: action.content };
+    return {
+      ...state,
+      loggedIn: true,
+      username: action.content,
+      userId: action.userId
+    };
   }
   if (action.type === "set-items") {
     return { ...state, items: action.content };
@@ -90,7 +95,13 @@ let reducer = (state, action) => {
       searchQuery: action.content
     };
   }
-
+  if (action.type === "set-cart") {
+    return {
+      ...state,
+      cart: action.content,
+      shoppingList: action.content.products
+    };
+  }
   return state;
 };
 const store = createStore(
@@ -98,8 +109,10 @@ const store = createStore(
   {
     loggedIn: false,
     username: undefined,
+    userId: undefined,
     items: [],
     shoppingList: [],
+    cart: null,
     shoppingHistory: [],
     shippingAddress: "",
     searchQuery: "",

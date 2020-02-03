@@ -10,11 +10,27 @@ const Wrapper = styled.div`
 `;
 
 class ItemDetails extends Component {
-  addtoShoppingList = () => {
-    this.props.dispatch({
-      type: "add-shoppinglist",
-      content: this.props.contents
-    });
+  addtoShoppingList = async () => {
+    // this.props.dispatch({
+    //   type: "add-shoppinglist",
+    //   content: this.props.contents
+    // });
+    // here it is to communicate with server to add product to cart (if cart existed, if no, created a cart for the user)
+    let formData = new FormData();
+    formData.append("userId", this.props.userId);
+    formData.append("quantity", 1);
+    formData.append("productId", this.props.contents._id);
+    formData.append("description", this.props.contents.description);
+    formData.append("price", this.props.contents.price);
+
+    let response = await fetch("/add-cart", { method: "POST", body: formData });
+    let body = await response.text();
+    body = JSON.parse(body);
+    if (body.success) {
+      console.log("new Cart returned, ", body.cart);
+      this.props.dispatch({ type: "set-cart", content: body.cart });
+      alert("items added CART successfully!");
+    } else alert("Something went wrong with the cart");
   };
 
   render() {
@@ -47,7 +63,8 @@ class ItemDetails extends Component {
 }
 let mapStateToProps = state => {
   return {
-    shoppingList: state.shoppingList
+    shoppingList: state.shoppingList,
+    userId: state.userId
   };
 };
 export default connect(mapStateToProps)(ItemDetails);

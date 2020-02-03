@@ -33,14 +33,32 @@ MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 
 // Your endpoints go after this line
 
-app.get("/session", (req, res) => {
+app.get("/session", async (req, res) => {
   const sessionId = req.cookies.sid;
-  const username = sessions[sessionId];
-  if (username) {
-    return res.send(JSON.stringify({ success: true, username }));
+  const user = sessions[sessionId];
+  if (user) {
+    let cart = await getCart(user.userId);
+    console.log("cart in fetch session", cart);
+    return res.send(
+      JSON.stringify({
+        success: true,
+        username: user.username,
+        userId: user.userId,
+        cart: cart
+      })
+    );
   }
   res.send(JSON.stringify({ success: false }));
 });
+
+let getCart = async userId => {
+  console.log("userID to get cart", userId);
+  let results = await dbo
+    .collection("carts")
+    .findOne({ _id: String(userId), state: "active" });
+  console.log("search results for the carts", results);
+  return results;
+};
 app.post("/signup", upload.none(), (req, res) => {
   console.log("**** I'm in the signup endpoint");
   console.log("this is the body", req.body);
@@ -71,7 +89,7 @@ let login = (req, res) => {
   console.log("login", req.body);
   let username = req.body.username;
   let enteredPassword = req.body.password;
-  dbo.collection("users").findOne({ username: username }, (err, user) => {
+  dbo.collection("users").findOne({ username: username }, async (err, user) => {
     if (err) {
       console.log("/login error", err);
       res.send(JSON.stringify({ success: false }));
@@ -86,9 +104,14 @@ let login = (req, res) => {
       console.log("Password matches");
       let sessionId = generateId();
       console.log("generated id", sessionId);
-      sessions[sessionId] = username;
+      sessions[sessionId] = { username: username, userId: user._id };
       res.cookie("sid", sessionId);
-      res.send(JSON.stringify({ success: true }));
+      console.log("user ID in login", user._id);
+
+      let cart = await getCart(user._id);
+      console.log("cart in Login", cart);
+
+      res.send(JSON.stringify({ success: true, userId: user._id, cart: cart }));
       return;
     }
     res.send(JSON.stringify({ success: false }));
@@ -256,6 +279,40 @@ app.get("/get-orders", (req, res) => {
       console.log("Orders object", orders);
       res.send(JSON.stringify({ success: true, data: orders }));
     });
+});
+
+app.post("/add-cart", upload.none(), async (req, res) => {
+  console.log("IN the add-car endpoint, body", req.body);
+
+  const userId = req.body.userId;
+  const productId = req.body.productId;
+  const quantity = req.body.quantity;
+  const description = req.body.description;
+  const price = req.body.price;
+  let newCart = null;
+
+  try {
+    newCart = await dbo.collection("carts").findOneAndUpdate(
+      { _id: userId, state: "active" },
+      {
+        $set: { modificationOn: new Date() },
+        $push: {
+          products: {
+            _id: productId,
+            quantity: quantity,
+            description: description,
+            price: price
+          }
+        }
+      },
+      { upsert: true, returnOriginal: false }
+    );
+  } catch (e) {
+    print(e);
+    res.send(JSON.stringify({ success: false }));
+  }
+  console.log("New cart updated ", newCart);
+  res.send(JSON.stringify({ success: true, cart: newCart.value }));
 });
 // Your endpoints go before this line
 

@@ -39,7 +39,15 @@ class App extends Component {
     const body = await response.text();
     const parsed = JSON.parse(body);
     if (parsed.success) {
-      this.props.dispatch({ type: "login-success", content: parsed.username });
+      this.props.dispatch({
+        type: "login-success",
+        content: parsed.username,
+        userId: parsed.userId
+      });
+      this.props.dispatch({
+        type: "set-cart",
+        content: parsed.cart
+      });
     }
     this.setState({ loading: false });
   };

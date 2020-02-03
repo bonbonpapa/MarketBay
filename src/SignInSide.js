@@ -84,6 +84,7 @@ export default function SignInSide() {
     console.log("responseBody from login", responseBody);
     let body = JSON.parse(responseBody);
     console.log("parsed body", body);
+    console.log("userID", body.userId);
 
     if (!body.success) {
       alert("login failed");
@@ -91,7 +92,12 @@ export default function SignInSide() {
     }
     dispatch({
       type: "login-success",
-      content: username
+      content: username,
+      userId: body.userId
+    });
+    dispatch({
+      type: "set-cart",
+      content: body.cart
     });
   }
 

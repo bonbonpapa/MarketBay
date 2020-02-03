@@ -30,7 +30,8 @@ class Signup extends Component {
     if (!body.success) alert(body.error);
     this.props.dispatch({
       type: "login-success",
-      content: this.state.username
+      content: this.state.username,
+      userId: body.userId
     });
   };
   render = () => {
