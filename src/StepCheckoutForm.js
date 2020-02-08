@@ -13,8 +13,7 @@ import Typography from "@material-ui/core/Typography";
 import AddressForm from "./AddressForm.js";
 import PaymentForm from "./PaymentForm.js";
 import Review from "./Review.js";
-import { injectStripe } from "react-stripe-elements";
-import axios from "axios";
+import { useSelector } from "react-redux";
 
 function Copyright() {
   return (
@@ -72,24 +71,15 @@ const useStyles = makeStyles(theme => ({
 
 const steps = ["Shipping address", "Payment details", "Review your order"];
 
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return <AddressForm />;
-    case 1:
-      return <PaymentForm />;
-    case 2:
-      return <Review />;
-    default:
-      throw new Error("Unknown step");
-  }
-}
-
-const StepCheckoutForm = ({ stripe }) => {
+const StepCheckoutForm = () => {
   const classes = useStyles();
-  const [activeStep, setActiveStep] = React.useState(0);
-  const [receiptUrl, setReceiptUrl] = useState("");
-  let amount = 34.06;
+  const [activeStep, setActiveStep] = useState(0);
+  // const [receiptUrl, setReceiptUrl] = useState("");
+  const order = useSelector(state => state.order);
+
+  // if (order) {
+  //   setReceiptUrl(order.data.charge.receipt_url);
+  // }
 
   const handleNext = () => {
     setActiveStep(activeStep + 1);
@@ -98,28 +88,18 @@ const StepCheckoutForm = ({ stripe }) => {
   const handleBack = () => {
     setActiveStep(activeStep - 1);
   };
-  const handleSubmit = async event => {
-    event.preventDefault();
 
-    const { token } = await stripe.createToken();
-
-    const order = await axios.post("/charge", {
-      amount: amount.toString().replace(".", ""),
-      source: token.id,
-      receipt_email: "customer@example.com"
-    });
-
-    setReceiptUrl(order.data.charge.receipt_url);
-  };
-
-  if (receiptUrl) {
-    return (
-      <div className="success">
-        <h2>Payment Successful!</h2>
-        <a href={receiptUrl}>View Receipt</a>
-        <Link to="/">Home</Link>
-      </div>
-    );
+  function getStepContent(step) {
+    switch (step) {
+      case 0:
+        return <AddressForm onSubmit={handleNext} />;
+      case 1:
+        return <PaymentForm onSubmit={handleNext} />;
+      case 2:
+        return <Review onSubmit={handleNext} />;
+      default:
+        throw new Error("Unknown step");
+    }
   }
 
   return (
@@ -143,6 +123,16 @@ const StepCheckoutForm = ({ stripe }) => {
                 <Typography variant="h5" gutterBottom>
                   Thank you for your order.
                 </Typography>
+                {order ? (
+                  <div>
+                    <h2>Payment Successful!</h2>
+                    <a href={order.data.charge.receipt_url}>View Receipt</a>
+                  </div>
+                ) : (
+                  <div>
+                    <h2>Payment failed!</h2>{" "}
+                  </div>
+                )}
                 <Typography variant="subtitle1">
                   Your order number is #2001539. We have emailed your order
                   confirmation, and will send you an update when your order has
@@ -151,37 +141,35 @@ const StepCheckoutForm = ({ stripe }) => {
               </React.Fragment>
             ) : (
               <React.Fragment>
-                <form className={classes.form} onSubmit={handleSubmit}>
-                  {getStepContent(activeStep)}
-                  <div className={classes.buttons}>
-                    {activeStep !== 0 && (
-                      <Button onClick={handleBack} className={classes.button}>
-                        Back
-                      </Button>
-                    )}
+                {getStepContent(activeStep)}
+                <div className={classes.buttons}>
+                  {activeStep !== 0 && (
+                    <Button onClick={handleBack} className={classes.button}>
+                      Back
+                    </Button>
+                  )}
 
-                    {activeStep === steps.length - 1 ? (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        className={classes.button}
-                      >
-                        Place order
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleNext}
-                        type="button"
-                        className={classes.button}
-                      >
-                        Next
-                      </Button>
-                    )}
-                  </div>
-                </form>
+                  {activeStep === steps.length - 1 ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      className={classes.button}
+                    >
+                      Place order
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleNext}
+                      type="button"
+                      className={classes.button}
+                    >
+                      Next
+                    </Button>
+                  )}
+                </div>
               </React.Fragment>
             )}
           </React.Fragment>
@@ -191,4 +179,4 @@ const StepCheckoutForm = ({ stripe }) => {
     </React.Fragment>
   );
 };
-export default injectStripe(StepCheckoutForm);
+export default StepCheckoutForm;

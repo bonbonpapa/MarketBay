@@ -4,10 +4,17 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import Button from "@material-ui/core/Button";
 
-export default function AddressForm() {
+export default function AddressForm({ onSubmit }) {
+  const handleSubmit = event => {
+    event.preventDefault();
+
+    onSubmit();
+  };
+
   return (
-    <React.Fragment>
+    <form onSubmit={handleSubmit}>
       <Typography variant="h6" gutterBottom>
         Shipping address
       </Typography>
@@ -89,6 +96,7 @@ export default function AddressForm() {
             autoComplete="billing country"
           />
         </Grid>
+
         <Grid item xs={12}>
           <FormControlLabel
             control={
@@ -98,6 +106,9 @@ export default function AddressForm() {
           />
         </Grid>
       </Grid>
-    </React.Fragment>
+      <Button variant="contained" color="primary" type="submit">
+        Next
+      </Button>
+    </form>
   );
 }

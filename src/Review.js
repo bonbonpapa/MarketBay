@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Grid from "@material-ui/core/Grid";
+import Button from "@material-ui/core/Button";
+import Link from "@material-ui/core/Link";
+import axios from "axios";
 
 const products = [
   { name: "Product 1", desc: "A nice thing", price: "$9.99" },
@@ -39,11 +43,30 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Review() {
+export default function Review({ onSubmit }) {
   const classes = useStyles();
 
+  const token = useSelector(state => state.token);
+  const dispatch = useDispatch();
+
+  const amount = 100.0;
+
+  const handleSubmit = async event => {
+    event.preventDefault();
+
+    const order = await axios.post("/charge", {
+      amount: amount.toString().replace(".", ""),
+      source: token.id,
+      receipt_email: "customer@example.com"
+    });
+
+    dispatch({ type: "set-order", payload: order });
+
+    onSubmit();
+  };
+
   return (
-    <React.Fragment>
+    <form onSubmit={handleSubmit}>
       <Typography variant="h6" gutterBottom>
         Order summary
       </Typography>
@@ -87,6 +110,9 @@ export default function Review() {
           </Grid>
         </Grid>
       </Grid>
-    </React.Fragment>
+      <Button variant="contained" color="primary" type="submit">
+        Place order
+      </Button>
+    </form>
   );
 }

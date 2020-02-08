@@ -109,6 +109,18 @@ let reducer = (state, action) => {
       cart: action.content
     };
   }
+  if (action.type === "set-token") {
+    return {
+      ...state,
+      token: action.payload
+    };
+  }
+  if (action.type === "set-order") {
+    return {
+      ...state,
+      order: action.payload
+    };
+  }
   return state;
 };
 const store = createStore(
@@ -123,7 +135,9 @@ const store = createStore(
     shoppingHistory: [],
     shippingAddress: "",
     searchQuery: "",
-    card: null
+    card: null,
+    token: null,
+    order: null
   },
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );

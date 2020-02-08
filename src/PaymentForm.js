@@ -1,18 +1,32 @@
 import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import Button from "@material-ui/core/Button";
 import {
   CardNumberElement,
   CardExpiryElement,
-  CardCVCElement
+  CardCVCElement,
+  injectStripe
 } from "react-stripe-elements";
 
-const PaymentForm = ({ stripe }) => {
+const PaymentForm = ({ stripe, onSubmit }) => {
+  const dispatch = useDispatch();
+
+  const handleSubmit = async event => {
+    event.preventDefault();
+
+    const { token } = await stripe.createToken();
+
+    onSubmit();
+
+    dispatch({ type: "set-token", payload: token });
+  };
   return (
-    <React.Fragment>
+    <form onSubmit={handleSubmit}>
       <Typography variant="h6" gutterBottom>
         Payment method
       </Typography>
@@ -45,7 +59,10 @@ const PaymentForm = ({ stripe }) => {
           />
         </Grid>
       </Grid>
-    </React.Fragment>
+      <Button variant="contained" color="primary" type="submit">
+        Next
+      </Button>
+    </form>
   );
 };
-export default PaymentForm;
+export default injectStripe(PaymentForm);
