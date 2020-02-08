@@ -10,6 +10,14 @@ let reducer = (state, action) => {
       userId: action.userId
     };
   }
+  if (action.type === "log-out") {
+    return {
+      ...state,
+      loggedIn: false,
+      username: undefined,
+      userId: undefined
+    };
+  }
   if (action.type === "set-items") {
     return { ...state, items: action.content };
   }
@@ -29,15 +37,15 @@ let reducer = (state, action) => {
   if (action.type === "clear-shoppinglist") {
     return {
       ...state,
-      shoppingList: []
+      cart: null
     };
   }
   if (action.type === "delete-from-list") {
-    const cartCopy = state.shoppingList.slice();
+    const cartCopy = state.cart.products.slice();
     cartCopy.splice(action.content, 1);
     return {
       ...state,
-      shoppingList: cartCopy
+      cart: { ...state.cart, products: cartCopy }
     };
   }
   if (action.type === "init-card") {
@@ -98,8 +106,7 @@ let reducer = (state, action) => {
   if (action.type === "set-cart") {
     return {
       ...state,
-      cart: action.content,
-      shoppingList: action.content.products
+      cart: action.content
     };
   }
   return state;

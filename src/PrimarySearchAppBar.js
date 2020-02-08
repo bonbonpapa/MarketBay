@@ -13,6 +13,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import MailIcon from "@material-ui/icons/Mail";
+import StoreOutlinedIcon from "@material-ui/icons/StoreOutlined";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
 import MoreIcon from "@material-ui/icons/MoreVert";
@@ -100,7 +101,10 @@ export default function PrimarySearchAppBar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const query = useSelector(state => state.searchQuery);
-  const shoppingListCount = useSelector(state => state.shoppingList.length);
+  const cart = useSelector(state => state.cart);
+  const shoppingListCount = cart ? cart.products.length : 0;
+
+  // const shoppingListCount = useSelector(state => state.shoppingList.length);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -126,6 +130,12 @@ export default function PrimarySearchAppBar() {
     dispatch({ type: "query", content: event.target.value });
   };
 
+  const handleLogout = event => {
+    fetch("/logout", { method: "POST", credentials: "same-origin" });
+
+    dispatch({ type: "log-out" });
+  };
+
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
@@ -140,7 +150,12 @@ export default function PrimarySearchAppBar() {
       <MenuItem onClick={handleMenuClose}>
         <MenuLink to="/profile">Profile</MenuLink>
       </MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+        <MenuLink to="/account">My Account</MenuLink>
+      </MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+        <IconButton onClick={handleLogout}>Logout</IconButton>
+      </MenuItem>
     </Menu>
   );
 
@@ -156,20 +171,18 @@ export default function PrimarySearchAppBar() {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
-        <IconButton aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="secondary">
-            <MailIcon />
-          </Badge>
+        <IconButton aria-label="sell items" color="inherit">
+          <StoreOutlinedIcon />
         </IconButton>
-        <p>Messages</p>
+        <MenuLink to="/updateItems">Sell Items</MenuLink>
       </MenuItem>
       <MenuItem>
-        <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={11} color="secondary">
-            <NotificationsIcon />
+        <IconButton aria-label="show items in the cart" color="inherit">
+          <Badge badgeContent={shoppingListCount} color="secondary">
+            <ShoppingCartIcon />
           </Badge>
         </IconButton>
-        <p>Notifications</p>
+        <MenuLink to="/shoppingcart">Cart</MenuLink>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
@@ -195,7 +208,11 @@ export default function PrimarySearchAppBar() {
             color="inherit"
             aria-label="open drawer"
           >
-            <MenuIcon />
+            <NavbarLink to="/">
+              <div className={classes.cartIcon}>
+                <MenuIcon />
+              </div>
+            </NavbarLink>
           </IconButton>
           <Typography className={classes.title} variant="h6" noWrap>
             <NavbarLink to="/">EASY BAY</NavbarLink>

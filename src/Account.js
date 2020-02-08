@@ -4,16 +4,29 @@ import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import Paper from "@material-ui/core/Paper";
+import Grid from "@material-ui/core/Grid";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import Collapse from "@material-ui/core/Collapse";
-import StarBorder from "@material-ui/icons/StarBorder";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import ShoppingBasketIcon from "@material-ui/icons/ShoppingBasket";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 
+const addresses = [
+  "1 Material-UI Drive",
+  "Reactville",
+  "Anytown",
+  "99999",
+  "USA"
+];
+const payments = [
+  { name: "Card type", detail: "Visa" },
+  { name: "Card holder", detail: "Mr John Smith" },
+  { name: "Card number", detail: "xxxx-xxxx-xxxx-1234" },
+  { name: "Expiry date", detail: "04/2024" }
+];
 const useStyles = makeStyles(theme => ({
   layout: {
     width: "auto",
@@ -49,21 +62,16 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Purchased() {
+export default function Account() {
   const classes = useStyles();
 
   let [orders, setOrders] = useState([]);
   let username = useSelector(state => state.username);
   console.log("username in Purchased function components", username);
 
-  const [open, setOpen] = React.useState(true);
-  const handleClick = () => {
-    setOpen(!open);
-  };
-
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch("/get-orders?username=" + username);
+      const res = await fetch("/get-account");
       let body = await res.text();
       body = JSON.parse(body);
       console.log("Body returned from server", body);
@@ -81,49 +89,34 @@ export default function Purchased() {
       <main className={classes.layout}>
         <Paper className={classes.paper}>
           <Typography variant="h6" gutterBottom>
-            Order History
+            Account Information
           </Typography>
-          <List disablePadding>
-            {orders.map(order => (
-              <>
-                <ListItem
-                  className={classes.listItem}
-                  key={order._id}
-                  button
-                  onClick={handleClick}
-                >
-                  <ListItemIcon>
-                    <ShoppingBasketIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      "Order placed on " +
-                      new Date(order.created_on).toLocaleDateString()
-                    }
-                  />
-                  <Typography variant="body2">
-                    {order.products.length + " items"}
-                  </Typography>
-                  {open ? <ExpandLess /> : <ExpandMore />}
-                </ListItem>
-                <Collapse in={open} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {order.products.map(product => (
-                      <ListItem button className={classes.nested}>
-                        <ListItemIcon>
-                          <FormatListBulletedIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={product.description} />
-                        <Typography variant="body2">
-                          {" x " + product.quantity}
-                        </Typography>
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-              </>
-            ))}
-          </List>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="h6" gutterBottom className={classes.title}>
+                Shipping
+              </Typography>
+              <Typography gutterBottom>John Smith</Typography>
+              <Typography gutterBottom>{addresses.join(", ")}</Typography>
+            </Grid>
+            <Grid item container direction="column" xs={12} sm={6}>
+              <Typography variant="h6" gutterBottom className={classes.title}>
+                Payment details
+              </Typography>
+              <Grid container>
+                {payments.map(payment => (
+                  <React.Fragment key={payment.name}>
+                    <Grid item xs={6}>
+                      <Typography gutterBottom>{payment.name}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography gutterBottom>{payment.detail}</Typography>
+                    </Grid>
+                  </React.Fragment>
+                ))}
+              </Grid>
+            </Grid>
+          </Grid>
         </Paper>
       </main>
     </React.Fragment>

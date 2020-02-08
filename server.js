@@ -55,7 +55,7 @@ let getCart = async userId => {
   console.log("userID to get cart", userId);
   let results = await dbo
     .collection("carts")
-    .findOne({ _id: String(userId), state: "active" });
+    .findOne({ userId: String(userId), state: "active" });
   console.log("search results for the carts", results);
   return results;
 };
@@ -122,7 +122,11 @@ app.post("/login", upload.none(), login);
 let generateId = () => {
   return "" + Math.floor(Math.random() * 100000000);
 };
-
+app.post("/logout", (req, res) => {
+  const sessionId = req.cookies.sid;
+  delete sessions[sessionId];
+  res.send(JSON.stringify({ success: true }));
+});
 app.post("/new-item", upload.array("mfiles", 9), async (req, res) => {
   console.log("request to /new-item, body: ", req.body);
 
@@ -141,21 +145,46 @@ app.post("/new-item", upload.array("mfiles", 9), async (req, res) => {
   console.log("return after insert many in the table", insertReturn);
 
   let description = req.body.description;
-  let price = req.body.price;
-  let inventory = req.body.inventory;
+  let price = parseFloat(req.body.price);
+  let inventory = parseInt(req.body.inventory);
   let location = req.body.location;
   let seller = req.body.seller;
   let defaultPaths = frontendPaths[0];
-  dbo.collection("items").insertOne({
-    description,
-    price,
-    inventory,
-    location,
-    seller,
-    defaultPaths,
-    frontendPaths: insertReturn.insertedIds
-  });
-  res.send(JSON.stringify({ success: true }));
+  dbo.collection("items").insertOne(
+    {
+      description,
+      price,
+      inventory,
+      location,
+      seller,
+      defaultPaths,
+      frontendPaths: insertReturn.insertedIds
+    },
+    (error, item) => {
+      if (error) {
+        console.log("error with insert product to database, ", error);
+        res.send(JSON.stringify({ success: false }));
+        return;
+      }
+
+      if (item.insertedCount === 1) {
+        dbo
+          .collection("inventory")
+          .insertOne(
+            { _id: item.ops[0]._id, inventory: inventory },
+            (err, inventory) => {
+              if (err) {
+                console.log("error with the insert inventories, ", err);
+                res.send(JSON.stringify({ success: false }));
+                return;
+              }
+              res.send(JSON.stringify({ success: true }));
+              return;
+            }
+          );
+      }
+    }
+  );
 });
 
 app.get("/all-items", (req, res) => {
@@ -209,6 +238,147 @@ app.post("/order", upload.none(), (req, res) => {
   res.send(JSON.stringify({ success: true }));
 });
 
+app.post("/orderCheck", upload.none(), async (req, res) => {
+  // get userID from session
+
+  console.log("in the orderCheck endpoiunt");
+  const sessionId = req.cookies.sid;
+  const user = sessions[sessionId];
+  const userId = user.userId;
+  const username = user.username;
+  const inventory = dbo.collection("inventory");
+  const carts = dbo.collection("carts");
+  const orders = dbo.collection("orders");
+  console.log("User ID ", userId);
+  let cart = await carts.findOne({ userId: String(userId), state: "active" });
+  let success = [];
+  let failed = [];
+
+  for (let i = 0; i < cart.products.length; i++) {
+    let product = cart.products[i];
+    let result = null;
+
+    try {
+      result = await inventory.findOneAndUpdate(
+        {
+          _id: ObjectID(product._id),
+          quantity: { $gte: parseInt(product.quantity) }
+        },
+        {
+          $inc: { quantity: -parseInt(product.quantity) },
+          $push: {
+            reservations: {
+              quantity: parseInt(product.quantity),
+              _id: cart._id,
+              createdOn: new Date()
+            }
+          }
+        }
+      );
+    } catch (err) {
+      console.log("error ", err);
+    }
+    console.log(
+      "results after updating the inventory with reservations ",
+      result
+    );
+    if (result.lastErrorObject.updatedExisting) success.push(product);
+    else failed.push(product);
+  }
+  console.log("Success array: ", success);
+  console.log("Failed array,", failed);
+  //if there are any products in the failed array, we need to rollback all the successful reservations into the
+  //inventories collection.
+  if (failed.length > 0) {
+    for (let i = 0; i < success.length; i++) {
+      let result = null;
+      try {
+        result = await inventory.findOneAndUpdate(
+          {
+            _id: ObjectID(success[i]._id),
+            "reservations._id": cart._id
+          },
+          {
+            $inc: { quantity: parseInt(success[i].quantity) },
+            $pull: { reservations: { _id: cart._id } }
+          },
+          { returnOriginal: false }
+        );
+      } catch (err) {
+        console.log("error, ", err);
+      }
+      console.log("results after rollback the inventories", result);
+    }
+    res.send(JSON.stringify({ success: false }));
+    return;
+  }
+
+  // If we succeeded in reserving all the products we create an order document, /
+  //set the cart to complete and release all the reservations from the inventories collection.
+
+  orders.insertOne({
+    created_on: new Date(),
+    userId: userId,
+    shipping: {
+      name: username,
+      address: "Some street 1, NY 11223"
+    },
+    payment: {
+      method: "visa",
+      transaction_id: "231221441XXXTD"
+    },
+    products: cart.products
+  });
+
+  carts.findOneAndUpdate(
+    {
+      _id: ObjectID(cart._id),
+      state: "active"
+    },
+    {
+      $set: { state: "completed" }
+    }
+  );
+
+  inventory.updateMany(
+    {
+      "reservations._id": cart._id
+    },
+    {
+      $pull: { reservations: { _id: cart._id } }
+    },
+    { upsert: false }
+  );
+
+  console.log("Cart in orderCheck endpoint, ", cart);
+  res.send(JSON.stringify({ success: true }));
+});
+app.post("/charge", cors(), postCharge);
+
+async function postCharge(req, res) {
+  try {
+    const { amount, source, receipt_email } = req.body;
+
+    const charge = await stripe.charges.create({
+      amount,
+      currency: "usd",
+      source,
+      receipt_email
+    });
+
+    if (!charge) throw new Error("charge unsuccessful");
+
+    res.status(200).json({
+      message: "charge posted successfully",
+      charge
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+}
+
 app.post("/checkout", cors(), async (req, res) => {
   console.log("Request:", req.body);
   let error;
@@ -259,13 +429,19 @@ app.post("/checkout", cors(), async (req, res) => {
 });
 
 app.get("/get-orders", (req, res) => {
-  console.log("request to the get media");
+  console.log("request to the get orders");
+
+  console.log("in the orderCheck endpoiunt");
+  const sessionId = req.cookies.sid;
+  const user = sessions[sessionId];
+  const userId = user.userId;
+
   const username = req.query.username;
   console.log("username", username);
 
   dbo
     .collection("orders")
-    .find({ username: username })
+    .find({ userId: ObjectID(userId) })
     .toArray((err, orders) => {
       if (err) {
         console.log("/get orders", err);
@@ -289,17 +465,43 @@ app.post("/add-cart", upload.none(), async (req, res) => {
   const quantity = req.body.quantity;
   const description = req.body.description;
   const price = req.body.price;
+  const existed = req.body.existedItem === "true" ? true : false;
   let newCart = null;
+
+  if (existed) {
+    try {
+      newCart = await dbo.collection("carts").findOneAndUpdate(
+        { userId: userId, state: "active", "products._id": productId },
+        {
+          $set: { modificationOn: new Date() },
+          $inc: { "products.$.quantity": parseInt(quantity) }
+        },
+        { returnOriginal: false }
+      );
+    } catch (e) {
+      console.log(
+        "Error with the add add-cart when find and update a cart, ",
+        e
+      );
+      res.send(JSON.stringify({ success: false }));
+      return;
+    }
+    if (newCart) {
+      console.log("New cart updated ", newCart);
+      res.send(JSON.stringify({ success: true, cart: newCart.value }));
+      return;
+    }
+  }
 
   try {
     newCart = await dbo.collection("carts").findOneAndUpdate(
-      { _id: userId, state: "active" },
+      { userId: userId, state: "active" },
       {
         $set: { modificationOn: new Date() },
         $push: {
           products: {
             _id: productId,
-            quantity: quantity,
+            quantity: parseInt(quantity),
             description: description,
             price: price
           }
@@ -308,12 +510,45 @@ app.post("/add-cart", upload.none(), async (req, res) => {
       { upsert: true, returnOriginal: false }
     );
   } catch (e) {
-    print(e);
+    console.log("Error with the add add-cart when find and update a cart, ", e);
     res.send(JSON.stringify({ success: false }));
+    return;
   }
-  console.log("New cart updated ", newCart);
-  res.send(JSON.stringify({ success: true, cart: newCart.value }));
+  if (newCart) {
+    console.log("New cart updated ", newCart);
+    res.send(JSON.stringify({ success: true, cart: newCart.value }));
+    return;
+  }
+  res.send(JSON.stringify({ success: false }));
 });
+app.get("/delete-cartitem", async (req, res) => {
+  const pid = req.query.pid;
+  console.log("delete item in the cart, prduct id: ", pid);
+  const sessionId = req.cookies.sid;
+  const user = sessions[sessionId];
+  if (user) {
+    try {
+      newCart = await dbo
+        .collection("carts")
+        .findOneAndUpdate(
+          { userId: String(user.userId), state: "active" },
+          { $pull: { products: { _id: String(pid) } } },
+          { returnOriginal: false }
+        );
+    } catch (err) {
+      console.log("Error with delete item from Cart", err);
+      res.send(JSON.stringify({ success: false }));
+      return;
+    }
+    if (newCart) {
+      console.log("New cart updated ", newCart);
+      res.send(JSON.stringify({ success: true, cart: newCart.value }));
+      return;
+    }
+  }
+  res.send(JSON.stringify({ success: false }));
+});
+
 // Your endpoints go before this line
 
 app.all("/*", (req, res, next) => {

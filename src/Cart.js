@@ -7,7 +7,10 @@ import Paper from "@material-ui/core/Paper";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import axios from "axios";
+import Button from "@material-ui/core/Button";
 import StripeCheckout from "react-stripe-checkout";
+import { Link } from "react-router-dom";
+import Checkout from "./Checkout.jsx";
 
 const useStyles = makeStyles(theme => ({
   layout: {
@@ -38,6 +41,12 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     marginTop: theme.spacing(2)
+  },
+  remove: {
+    marginLeft: theme.spacing(2)
+  },
+  checkout: {
+    margin: theme.spacing(3, 0, 2)
   }
 }));
 
@@ -50,7 +59,14 @@ export default function Cart() {
   });
   const dispatch = useDispatch();
 
-  const shoppingList = useSelector(state => state.shoppingList);
+  const cart = useSelector(state => state.cart);
+
+  const shoppingList = cart ? cart.products : [];
+
+  let totalAmount = 0;
+  shoppingList.forEach((item, idx) => {
+    totalAmount += parseFloat(item.price) * parseInt(item.quantity);
+  });
 
   async function handleToken(token) {
     console.log({ token });
@@ -73,6 +89,35 @@ export default function Cart() {
     }
   }
 
+  const handlePurchase = event => {};
+
+  async function handleCheckout(event) {
+    event.preventDefault();
+
+    let response = await fetch("/orderCheck", { method: "POST" });
+    let body = await response.text();
+    body = JSON.parse(body);
+    if (body.success) {
+      alert("check out successfully");
+      dispatch({ type: "clear-shoppinglist" });
+    } else {
+      alert("something went wrong");
+    }
+  }
+  async function DeletefromShoppingList(idx, id_db) {
+    let response = await fetch("/delete-cartitem?pid=" + id_db);
+    let body = await response.text();
+    body = JSON.parse(body);
+    if (body.success) {
+      alert("delete item from cart");
+      console.log("new Cart returned, ", body.cart);
+      dispatch({ type: "set-cart", content: body.cart });
+    } else {
+      alert("something went wrong");
+    }
+    //  dispatch({ type: "delete-from-list", content: idx });
+  }
+
   return (
     <React.Fragment>
       <main className={classes.layout}>
@@ -81,19 +126,63 @@ export default function Cart() {
             Order summary
           </Typography>
           <List disablePadding>
-            {shoppingList.map(product => (
-              <ListItem className={classes.listItem} key={product.description}>
-                <ListItemText primary={product.description} />
-                <Typography variant="body2">{product.price}</Typography>
-              </ListItem>
-            ))}
+            {shoppingList &&
+              shoppingList.map((product, idx) => {
+                return (
+                  <ListItem
+                    className={classes.listItem}
+                    key={product.description}
+                  >
+                    <ListItemText
+                      primary={product.description}
+                      secondary={"x " + product.quantity}
+                    />
+                    <Typography variant="body2">
+                      {"$ " + product.price + " /ea"}
+                    </Typography>
+                    <Button
+                      onClick={() => DeletefromShoppingList(idx, product._id)}
+                      variant="contained"
+                      className={classes.remove}
+                    >
+                      Remove
+                    </Button>
+                  </ListItem>
+                );
+              })}
             <ListItem className={classes.listItem}>
               <ListItemText primary="Total" />
               <Typography variant="subtitle1" className={classes.total}>
-                $34.06
+                ${totalAmount}
               </Typography>
             </ListItem>
           </List>
+          <div>
+            <Button
+              onClick={handleCheckout}
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.checkout}
+            >
+              Checkout
+            </Button>
+          </div>
+          <div>
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.checkout}
+              component={Link}
+              to={"/stepcheck"}
+            >
+              Purchase
+            </Button>
+          </div>
+          <div>
+            <Checkout amount={totalAmount} />
+          </div>
           <div>
             <StripeCheckout
               stripeKey="pk_test_Od1JbkgXOi6lpyatgG3KaT8Z00pBw8C5ry"
@@ -101,6 +190,10 @@ export default function Cart() {
               billingAddress
               shippingAddress
               amount={34.06 * 100}
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.checkout}
             />
           </div>
         </Paper>

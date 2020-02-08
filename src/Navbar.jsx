@@ -34,7 +34,7 @@ class Navbar extends Component {
           <NavbarLink to="/profile">Profile</NavbarLink>
           <Link to="/shoppingcart" className="cart">
             <img src="/cart.svg" />
-            <span>{this.props.shoppingList.length}</span>
+            <span>{this.props.cart.products.length}</span>
           </Link>
         </div>
       </Wrapper>
@@ -43,7 +43,7 @@ class Navbar extends Component {
 }
 let mapStateToProps = state => {
   return {
-    shoppingList: state.shoppingList
+    cart: state.cart
   };
 };
 export default connect(mapStateToProps)(Navbar);

@@ -48,8 +48,8 @@ export default function SellSide() {
   const classes = useStyles();
 
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [inventory, setInventory] = useState("");
+  const [price, setPrice] = useState(0);
+  const [inventory, setInventory] = useState(0);
   const [location, setLocation] = useState("");
   const [files, setFiles] = useState([]);
 
@@ -74,8 +74,8 @@ export default function SellSide() {
     if (body.success) {
       alert("Item added successfully");
       setDescription("");
-      setPrice("");
-      setInventory("");
+      setPrice(0);
+      setInventory(0);
       setLocation("");
       setFiles([]);
       return;
@@ -119,7 +119,7 @@ export default function SellSide() {
               id="price"
               autoComplete="price"
               value={price}
-              onInput={e => setPrice(e.target.value)}
+              onInput={e => setPrice(parseFloat(e.target.value))}
             />
             <TextField
               variant="outlined"
@@ -131,7 +131,7 @@ export default function SellSide() {
               id="inventory"
               autoComplete="inventory"
               value={inventory}
-              onInput={e => setInventory(e.target.value)}
+              onInput={e => setInventory(parseInt(e.target.value))}
             />
             <TextField
               variant="outlined"

@@ -16,6 +16,8 @@ import SellSide from "./SellSide.js";
 import Cart from "./Cart.js";
 import Purchased from "./Purchased.js";
 import PrimarySearchAppBar from "./PrimarySearchAppBar.js";
+import Account from "./Account.js";
+import StepCheckout from "./StepCheckout.js";
 
 const Wrapper = styled.div`
   display: grid;
@@ -80,6 +82,12 @@ class App extends Component {
     // return <Profile />;
     return <Purchased />;
   };
+  renderAccount = () => {
+    return <Account />;
+  };
+  renderStepCheckout = () => {
+    return <StepCheckout />;
+  };
   renderPay = () => {
     return <Pay />;
   };
@@ -102,6 +110,13 @@ class App extends Component {
               render={this.renderShoppingCart}
             />
             <Route exact={true} path="/profile" render={this.renderProfile} />
+            <Route exact={true} path="/account" render={this.renderAccount} />
+            <Route
+              exact={true}
+              path="/stepcheck"
+              render={this.renderStepCheckout}
+            />
+            <Route exact={true} path="/logout" render={this.renderLogout} />
             <Route exact={true} path="/pay" render={this.renderPay} />
             <Route
               exact={true}

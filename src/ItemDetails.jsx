@@ -15,6 +15,16 @@ class ItemDetails extends Component {
     //   type: "add-shoppinglist",
     //   content: this.props.contents
     // });
+
+    //check if the item existed in the cart, if yes, send the existed to backend end to increase the quantity
+    // if the item not in the cart, send not existed to backend to push the product to the cart
+    let existed = false;
+    if (this.props.cart) {
+      existed = this.props.cart.products.some(
+        product => product._id === this.props.contents._id
+      );
+    }
+
     // here it is to communicate with server to add product to cart (if cart existed, if no, created a cart for the user)
     let formData = new FormData();
     formData.append("userId", this.props.userId);
@@ -22,6 +32,7 @@ class ItemDetails extends Component {
     formData.append("productId", this.props.contents._id);
     formData.append("description", this.props.contents.description);
     formData.append("price", this.props.contents.price);
+    formData.append("existedItem", existed);
 
     let response = await fetch("/add-cart", { method: "POST", body: formData });
     let body = await response.text();
@@ -63,7 +74,7 @@ class ItemDetails extends Component {
 }
 let mapStateToProps = state => {
   return {
-    shoppingList: state.shoppingList,
+    cart: state.cart,
     userId: state.userId
   };
 };
