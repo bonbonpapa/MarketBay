@@ -46,7 +46,10 @@ const useStyles = makeStyles(theme => ({
 export default function Review({ onSubmit }) {
   const classes = useStyles();
 
+  const shippingAddress = useSelector(state => state.shippingAddress);
+
   const token = useSelector(state => state.token);
+
   const dispatch = useDispatch();
 
   const amount = 100.0;
@@ -89,26 +92,34 @@ export default function Review({ onSubmit }) {
           <Typography variant="h6" gutterBottom className={classes.title}>
             Shipping
           </Typography>
-          <Typography gutterBottom>John Smith</Typography>
-          <Typography gutterBottom>{addresses.join(", ")}</Typography>
-        </Grid>
-        <Grid item container direction="column" xs={12} sm={6}>
-          <Typography variant="h6" gutterBottom className={classes.title}>
-            Payment details
+          <Typography gutterBottom>
+            {shippingAddress.name.firstname +
+              " " +
+              shippingAddress.name.lastname}
           </Typography>
-          <Grid container>
-            {payments.map(payment => (
-              <React.Fragment key={payment.name}>
-                <Grid item xs={6}>
-                  <Typography gutterBottom>{payment.name}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography gutterBottom>{payment.detail}</Typography>
-                </Grid>
-              </React.Fragment>
-            ))}
-          </Grid>
+          <Typography gutterBottom>
+            {Object.values(shippingAddress.address).join(", ")}
+          </Typography>
         </Grid>
+        <div>
+          <Grid item container direction="column" xs={12} sm={6}>
+            <Typography variant="h6" gutterBottom className={classes.title}>
+              Payment details
+            </Typography>
+            <Grid container>
+              {payments.map(payment => (
+                <div key={payment.name}>
+                  <Grid item xs={6}>
+                    <Typography gutterBottom>{payment.name}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography gutterBottom>{payment.detail}</Typography>
+                  </Grid>
+                </div>
+              ))}
+            </Grid>
+          </Grid>
+        </div>
       </Grid>
       <Button variant="contained" color="primary" type="submit">
         Place order

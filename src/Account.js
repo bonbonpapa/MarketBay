@@ -13,6 +13,7 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import ShoppingBasketIcon from "@material-ui/icons/ShoppingBasket";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
+import AddressForm from "./AddressForm.js";
 
 const addresses = [
   "1 Material-UI Drive",
@@ -65,27 +66,14 @@ const useStyles = makeStyles(theme => ({
 export default function Account() {
   const classes = useStyles();
 
-  let [orders, setOrders] = useState([]);
   let username = useSelector(state => state.username);
+  let shippingAddress = useSelector(state => state.shippingAddress);
   console.log("username in Purchased function components", username);
-
-  useEffect(() => {
-    async function fetchData() {
-      const res = await fetch("/get-account");
-      let body = await res.text();
-      body = JSON.parse(body);
-      console.log("Body returned from server", body);
-      if (body.success) {
-        setOrders(body.data);
-      }
-    }
-    fetchData();
-  }, [setOrders]);
 
   // const shoppingHistory = useSelector(state => state.shoppingHistory);
 
   return (
-    <React.Fragment>
+    <div>
       <main className={classes.layout}>
         <Paper className={classes.paper}>
           <Typography variant="h6" gutterBottom>
@@ -99,26 +87,10 @@ export default function Account() {
               <Typography gutterBottom>John Smith</Typography>
               <Typography gutterBottom>{addresses.join(", ")}</Typography>
             </Grid>
-            <Grid item container direction="column" xs={12} sm={6}>
-              <Typography variant="h6" gutterBottom className={classes.title}>
-                Payment details
-              </Typography>
-              <Grid container>
-                {payments.map(payment => (
-                  <React.Fragment key={payment.name}>
-                    <Grid item xs={6}>
-                      <Typography gutterBottom>{payment.name}</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography gutterBottom>{payment.detail}</Typography>
-                    </Grid>
-                  </React.Fragment>
-                ))}
-              </Grid>
-            </Grid>
+            <AddressForm />
           </Grid>
         </Paper>
       </main>
-    </React.Fragment>
+    </div>
   );
 }

@@ -103,7 +103,7 @@ const StepCheckoutForm = () => {
   }
 
   return (
-    <React.Fragment>
+    <div>
       <CssBaseline />
       <main className={classes.layout}>
         <Paper className={classes.paper}>
@@ -117,9 +117,9 @@ const StepCheckoutForm = () => {
               </Step>
             ))}
           </Stepper>
-          <React.Fragment>
+          <div>
             {activeStep === steps.length ? (
-              <React.Fragment>
+              <div>
                 <Typography variant="h5" gutterBottom>
                   Thank you for your order.
                 </Typography>
@@ -127,20 +127,16 @@ const StepCheckoutForm = () => {
                   <div>
                     <h2>Payment Successful!</h2>
                     <a href={order.data.charge.receipt_url}>View Receipt</a>
+                    <Typography variant="subtitle1">Order number</Typography>
                   </div>
                 ) : (
                   <div>
                     <h2>Payment failed!</h2>{" "}
                   </div>
                 )}
-                <Typography variant="subtitle1">
-                  Your order number is #2001539. We have emailed your order
-                  confirmation, and will send you an update when your order has
-                  shipped.
-                </Typography>
-              </React.Fragment>
+              </div>
             ) : (
-              <React.Fragment>
+              <div>
                 {getStepContent(activeStep)}
                 <div className={classes.buttons}>
                   {activeStep !== 0 && (
@@ -170,13 +166,13 @@ const StepCheckoutForm = () => {
                     </Button>
                   )}
                 </div>
-              </React.Fragment>
+              </div>
             )}
-          </React.Fragment>
+          </div>
         </Paper>
         <Copyright />
       </main>
-    </React.Fragment>
+    </div>
   );
 };
 export default StepCheckoutForm;

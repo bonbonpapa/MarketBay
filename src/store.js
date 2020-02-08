@@ -64,7 +64,7 @@ let reducer = (state, action) => {
   if (action.type === "set-shippingaddress") {
     return {
       ...state,
-      shippingAddress: action.content
+      shippingAddress: action.payload
     };
   }
   if (action.type === "clear-shippingAddress") {
@@ -133,7 +133,7 @@ const store = createStore(
     shoppingList: [],
     cart: null,
     shoppingHistory: [],
-    shippingAddress: "",
+    shippingAddress: null,
     searchQuery: "",
     card: null,
     token: null,
