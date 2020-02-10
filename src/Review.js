@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
@@ -7,23 +7,10 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
 import axios from "axios";
 
-const products = [
-  { name: "Product 1", desc: "A nice thing", price: "$9.99" },
-  { name: "Product 2", desc: "Another thing", price: "$3.45" },
-  { name: "Product 3", desc: "Something else", price: "$6.51" },
-  { name: "Product 4", desc: "Best thing of all", price: "$14.11" },
-  { name: "Shipping", desc: "", price: "Free" }
-];
-const addresses = [
-  "1 Material-UI Drive",
-  "Reactville",
-  "Anytown",
-  "99999",
-  "USA"
-];
 const payments = [
   { name: "Card type", detail: "Visa" },
   { name: "Card holder", detail: "Mr John Smith" },
@@ -43,22 +30,31 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Review({ onSubmit }) {
+export default function Review({ onSubmit, handleBackCall }) {
   const classes = useStyles();
+
+  const dispatch = useDispatch();
 
   const shippingAddress = useSelector(state => state.shippingAddress);
 
   const token = useSelector(state => state.token);
 
-  const dispatch = useDispatch();
+  const cart = useSelector(state => state.cart);
 
-  const amount = 100.0;
+  const shoppingList = cart ? cart.products : [];
+
+  const card = token ? token.card : null;
+
+  let totalAmount = 0;
+  shoppingList.forEach((item, idx) => {
+    totalAmount += parseFloat(item.price) * parseInt(item.quantity);
+  });
 
   const handleSubmit = async event => {
     event.preventDefault();
 
     const order = await axios.post("/charge", {
-      amount: amount.toString().replace(".", ""),
+      amount: totalAmount.toString().replace(".", ""),
       source: token.id,
       receipt_email: "customer@example.com"
     });
@@ -67,6 +63,10 @@ export default function Review({ onSubmit }) {
 
     onSubmit();
   };
+  useEffect(() => {}, [shippingAddress]);
+  const handleBack = event => {
+    handleBackCall();
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -74,21 +74,29 @@ export default function Review({ onSubmit }) {
         Order summary
       </Typography>
       <List disablePadding>
-        {products.map(product => (
-          <ListItem className={classes.listItem} key={product.name}>
-            <ListItemText primary={product.name} secondary={product.desc} />
-            <Typography variant="body2">{product.price}</Typography>
-          </ListItem>
-        ))}
+        {shoppingList &&
+          shoppingList.map((product, idx) => {
+            return (
+              <ListItem className={classes.listItem} key={product.description}>
+                <ListItemText
+                  primary={product.description}
+                  secondary={"x " + product.quantity}
+                />
+                <Typography variant="body2">
+                  {"$ " + product.price + " /ea"}
+                </Typography>
+              </ListItem>
+            );
+          })}
         <ListItem className={classes.listItem}>
           <ListItemText primary="Total" />
           <Typography variant="subtitle1" className={classes.total}>
-            $34.06
+            {"$ " + totalAmount}
           </Typography>
         </ListItem>
       </List>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12}>
           <Typography variant="h6" gutterBottom className={classes.title}>
             Shipping
           </Typography>
@@ -101,26 +109,35 @@ export default function Review({ onSubmit }) {
             {Object.values(shippingAddress.address).join(", ")}
           </Typography>
         </Grid>
-        <div>
-          <Grid item container direction="column" xs={12} sm={6}>
-            <Typography variant="h6" gutterBottom className={classes.title}>
-              Payment details
+        <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom className={classes.title}>
+            Payment details
+          </Typography>
+          <div>
+            <Typography gutterBottom>{`Card Type:  ${
+              card ? card.brand : ""
+            }`}</Typography>
+          </div>
+          <div>
+            <Typography gutterBottom>{`Card Holder: ${
+              card ? card.name : ""
+            }`}</Typography>
+          </div>
+          <div>
+            <Typography gutterBottom>
+              {`Card Number: ${
+                card ? "xxxx - xxxx - xxxx -" + card.last4 : ""
+              }`}
             </Typography>
-            <Grid container>
-              {payments.map(payment => (
-                <div key={payment.name}>
-                  <Grid item xs={6}>
-                    <Typography gutterBottom>{payment.name}</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography gutterBottom>{payment.detail}</Typography>
-                  </Grid>
-                </div>
-              ))}
-            </Grid>
-          </Grid>
-        </div>
+          </div>
+          <div>
+            <Typography gutterBottom>{`Expiry date: ${
+              card ? card.exp_month + "/" + card.exp_year : ""
+            }`}</Typography>
+          </div>
+        </Grid>
       </Grid>
+      <Button onClick={handleBack}>Back</Button>
       <Button variant="contained" color="primary" type="submit">
         Place order
       </Button>

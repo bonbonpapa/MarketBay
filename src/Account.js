@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
+import { Link } from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
+import Button from "@material-ui/core/Button";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -15,19 +17,6 @@ import ShoppingBasketIcon from "@material-ui/icons/ShoppingBasket";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import AddressForm from "./AddressForm.js";
 
-const addresses = [
-  "1 Material-UI Drive",
-  "Reactville",
-  "Anytown",
-  "99999",
-  "USA"
-];
-const payments = [
-  { name: "Card type", detail: "Visa" },
-  { name: "Card holder", detail: "Mr John Smith" },
-  { name: "Card number", detail: "xxxx-xxxx-xxxx-1234" },
-  { name: "Expiry date", detail: "04/2024" }
-];
 const useStyles = makeStyles(theme => ({
   layout: {
     width: "auto",
@@ -58,19 +47,22 @@ const useStyles = makeStyles(theme => ({
   title: {
     marginTop: theme.spacing(2)
   },
-  nested: {
-    paddingLeft: theme.spacing(4)
+  shipping: {
+    margin: theme.spacing(3, 0, 2)
   }
 }));
 
 export default function Account() {
   const classes = useStyles();
+  const [show_form, setShowForm] = useState(false);
 
   let username = useSelector(state => state.username);
   let shippingAddress = useSelector(state => state.shippingAddress);
   console.log("username in Purchased function components", username);
 
-  // const shoppingHistory = useSelector(state => state.shoppingHistory);
+  const handleClick = event => {
+    setShowForm(!show_form);
+  };
 
   return (
     <div>
@@ -84,10 +76,27 @@ export default function Account() {
               <Typography variant="h6" gutterBottom className={classes.title}>
                 Shipping
               </Typography>
-              <Typography gutterBottom>John Smith</Typography>
-              <Typography gutterBottom>{addresses.join(", ")}</Typography>
+              <Typography gutterBottom>
+                {shippingAddress.name.firstname +
+                  " " +
+                  shippingAddress.name.lastname}
+              </Typography>
+              <Typography gutterBottom>
+                {Object.values(shippingAddress.address).join(", ")}
+              </Typography>
+              <div>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.shipping}
+                  onClick={handleClick}
+                >
+                  Update Shipping Information
+                </Button>
+              </div>
             </Grid>
-            <AddressForm />
+            {show_form ? <AddressForm onSubmit={handleClick} /> : <></>}
           </Grid>
         </Paper>
       </main>

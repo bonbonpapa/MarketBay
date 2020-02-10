@@ -62,9 +62,11 @@ let reducer = (state, action) => {
     };
   }
   if (action.type === "set-shippingaddress") {
+    let shippingCopy = { ...state.shippingAddress };
+    shippingCopy = action.payload;
     return {
       ...state,
-      shippingAddress: action.payload
+      shippingAddress: shippingCopy
     };
   }
   if (action.type === "clear-shippingAddress") {

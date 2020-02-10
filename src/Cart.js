@@ -8,9 +8,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import axios from "axios";
 import Button from "@material-ui/core/Button";
-import StripeCheckout from "react-stripe-checkout";
 import { Link } from "react-router-dom";
-import Checkout from "./Checkout.jsx";
 
 const useStyles = makeStyles(theme => ({
   layout: {
@@ -179,22 +177,6 @@ export default function Cart() {
             >
               Purchase
             </Button>
-          </div>
-          <div>
-            <Checkout amount={totalAmount} />
-          </div>
-          <div>
-            <StripeCheckout
-              stripeKey="pk_test_Od1JbkgXOi6lpyatgG3KaT8Z00pBw8C5ry"
-              token={handleToken}
-              billingAddress
-              shippingAddress
-              amount={34.06 * 100}
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.checkout}
-            />
           </div>
         </Paper>
       </main>

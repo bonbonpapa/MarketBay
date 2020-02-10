@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
 
 export default function AddressForm(props) {
+  let shippingAddress = useSelector(state => state.shippingAddress);
+
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [address1, setAddress1] = useState("");
@@ -18,6 +18,19 @@ export default function AddressForm(props) {
   const [country, setCountry] = useState("");
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setFirstname(shippingAddress ? shippingAddress.name.firstname : "");
+    setLastname(shippingAddress ? shippingAddress.name.lastname : "");
+    setAddress1(shippingAddress ? shippingAddress.address.line1 : "");
+    setAddress2(shippingAddress ? shippingAddress.address.line2 : "");
+    setCity(shippingAddress ? shippingAddress.address.city : "");
+    setAddress_state(
+      shippingAddress ? shippingAddress.address.address_state : ""
+    );
+    setZip(shippingAddress ? shippingAddress.address.postal_code : "");
+    setCountry(shippingAddress ? shippingAddress.address.country : "");
+  }, [shippingAddress]);
 
   const handleSubmit = async event => {
     event.preventDefault();
@@ -41,20 +54,8 @@ export default function AddressForm(props) {
     body = JSON.parse(body);
 
     if (body.success) {
-      alert("Shipping Address updated");
       dispatch({ type: "set-shippingaddress", payload: body.shipping });
     }
-    // let shippingAddress = {
-    //   name: { firstname, lastname },
-    //   address: {
-    //     line1: address1,
-    //     line2: address2,
-    //     city: city,
-    //     address_state: address_state,
-    //     postal_code: address_zip,
-    //     country: country
-    //   }
-    // };
 
     if (props.onSubmit) {
       props.onSubmit();
@@ -162,17 +163,11 @@ export default function AddressForm(props) {
         </Grid>
 
         <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Checkbox color="secondary" name="saveAddress" value="yes" />
-            }
-            label="Use this address for payment details"
-          />
+          <Button variant="contained" color="primary" type="submit">
+            Confirm
+          </Button>
         </Grid>
       </Grid>
-      <Button variant="contained" color="primary" type="submit">
-        Confirm
-      </Button>
     </form>
   );
 }

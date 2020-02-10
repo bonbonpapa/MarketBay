@@ -94,9 +94,11 @@ const StepCheckoutForm = () => {
       case 0:
         return <AddressForm onSubmit={handleNext} />;
       case 1:
-        return <PaymentForm onSubmit={handleNext} />;
+        return (
+          <PaymentForm onSubmit={handleNext} handleBackCall={handleBack} />
+        );
       case 2:
-        return <Review onSubmit={handleNext} />;
+        return <Review onSubmit={handleNext} handleBackCall={handleBack} />;
       default:
         throw new Error("Unknown step");
     }
@@ -142,27 +144,6 @@ const StepCheckoutForm = () => {
                   {activeStep !== 0 && (
                     <Button onClick={handleBack} className={classes.button}>
                       Back
-                    </Button>
-                  )}
-
-                  {activeStep === steps.length - 1 ? (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      className={classes.button}
-                    >
-                      Place order
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleNext}
-                      type="button"
-                      className={classes.button}
-                    >
-                      Next
                     </Button>
                   )}
                 </div>

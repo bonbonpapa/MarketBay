@@ -4,11 +4,6 @@ import { Route, BrowserRouter, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import AllItems from "./AllItems.jsx";
 import ItemDetails from "./ItemDetails.jsx";
-import Profile from "./Profile.jsx";
-import Pay from "./Pay.jsx";
-import ShoppingList from "./ShoppingList.jsx";
-import UpdateItem from "./UpdateItem.jsx";
-import Navbar from "./Navbar.jsx";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
 import SignInSide from "./SignInSide.js";
@@ -50,6 +45,10 @@ class App extends Component {
         type: "set-cart",
         content: parsed.cart
       });
+      this.props.dispatch({
+        type: "set-shippingaddress",
+        payload: parsed.shipping
+      });
     }
     this.setState({ loading: false });
   };
@@ -79,7 +78,6 @@ class App extends Component {
   };
 
   renderProfile = () => {
-    // return <Profile />;
     return <Purchased />;
   };
   renderAccount = () => {
@@ -88,11 +86,7 @@ class App extends Component {
   renderStepCheckout = () => {
     return <StepCheckout />;
   };
-  renderPay = () => {
-    return <Pay />;
-  };
   renderUpdateItem = () => {
-    // return <UpdateItem />;
     return <SellSide />;
   };
 
@@ -117,7 +111,6 @@ class App extends Component {
               render={this.renderStepCheckout}
             />
             <Route exact={true} path="/logout" render={this.renderLogout} />
-            <Route exact={true} path="/pay" render={this.renderPay} />
             <Route
               exact={true}
               path="/updateItems/"

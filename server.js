@@ -44,7 +44,8 @@ app.get("/session", async (req, res) => {
         success: true,
         username: user.username,
         userId: user.userId,
-        cart: cart
+        cart: cart,
+        shipping: user.shipping
       })
     );
   }
@@ -104,14 +105,25 @@ let login = (req, res) => {
       console.log("Password matches");
       let sessionId = generateId();
       console.log("generated id", sessionId);
-      sessions[sessionId] = { username: username, userId: user._id };
+      sessions[sessionId] = {
+        username: username,
+        userId: user._id,
+        shipping: user.shipping
+      };
       res.cookie("sid", sessionId);
       console.log("user ID in login", user._id);
 
       let cart = await getCart(user._id);
       console.log("cart in Login", cart);
 
-      res.send(JSON.stringify({ success: true, userId: user._id, cart: cart }));
+      res.send(
+        JSON.stringify({
+          success: true,
+          userId: user._id,
+          cart: cart,
+          shipping: user.shipping
+        })
+      );
       return;
     }
     res.send(JSON.stringify({ success: false }));
@@ -555,8 +567,8 @@ app.post("/update-address", upload.none(), async (req, res) => {
 
   const firstname = req.body.firstname;
   const lastname = req.body.lastname;
-  const line1 = req.body.address_line1;
-  const line2 = req.body.address_line2;
+  const line1 = req.body.address1;
+  const line2 = req.body.address2;
   const city = req.body.city;
   const country = req.body.country;
   const postal_code = req.body.address_zip;
@@ -567,7 +579,7 @@ app.post("/update-address", upload.none(), async (req, res) => {
         _id: ObjectID(user.userId)
       },
       {
-        $push: {
+        $set: {
           shipping: {
             name: { firstname, lastname },
             address: {
@@ -591,6 +603,10 @@ app.post("/update-address", upload.none(), async (req, res) => {
       "results after updating the users with shipping address ",
       result
     );
+    sessions[sessionId] = {
+      ...user,
+      shipping: result.value.shipping
+    };
     res.send(
       JSON.stringify({ success: true, shipping: result.value.shipping })
     );

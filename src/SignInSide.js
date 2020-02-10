@@ -99,6 +99,7 @@ export default function SignInSide() {
       type: "set-cart",
       content: body.cart
     });
+    dispatch({ type: "set-shippingaddress", payload: body.shipping });
   }
 
   return (
