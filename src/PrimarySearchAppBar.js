@@ -15,7 +15,7 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import StoreOutlinedIcon from "@material-ui/icons/StoreOutlined";
 import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
 import MoreIcon from "@material-ui/icons/MoreVert";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import styled from "styled-components";
 
 const NavbarLink = styled(Link)`
@@ -93,14 +93,18 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function PrimarySearchAppBar() {
+function PrimarySearchAppBar({ history }) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const query = useSelector(state => state.searchQuery);
   const cart = useSelector(state => state.cart);
-  const shoppingListCount = cart ? cart.products.length : 0;
+  const shoppingListCount = cart
+    ? cart.products.reduce((total, product) => {
+        return total + product.quantity;
+      }, 0)
+    : 0;
 
   // const shoppingListCount = useSelector(state => state.shoppingList.length);
 
@@ -130,6 +134,7 @@ export default function PrimarySearchAppBar() {
 
   const handleLogout = event => {
     fetch("/logout", { method: "POST", credentials: "same-origin" });
+    history.push("/");
 
     dispatch({ type: "log-out" });
   };
@@ -273,3 +278,4 @@ export default function PrimarySearchAppBar() {
     </div>
   );
 }
+export default withRouter(PrimarySearchAppBar);

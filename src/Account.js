@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
-import { Link } from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
-import List from "@material-ui/core/List";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import Collapse from "@material-ui/core/Collapse";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import ShoppingBasketIcon from "@material-ui/icons/ShoppingBasket";
-import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import AddressForm from "./AddressForm.js";
 
 const useStyles = makeStyles(theme => ({
@@ -77,12 +67,19 @@ export default function Account() {
                 Shipping
               </Typography>
               <Typography gutterBottom>
-                {shippingAddress.name.firstname +
-                  " " +
-                  shippingAddress.name.lastname}
+                {`${
+                  shippingAddress
+                    ? shippingAddress.name.firstname +
+                      shippingAddress.name.lastname
+                    : ""
+                }`}
               </Typography>
               <Typography gutterBottom>
-                {Object.values(shippingAddress.address).join(", ")}
+                {`${
+                  shippingAddress
+                    ? Object.values(shippingAddress.address).join(", ")
+                    : ""
+                }`}
               </Typography>
               <div>
                 <Button

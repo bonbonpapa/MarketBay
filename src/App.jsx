@@ -4,9 +4,8 @@ import { Route, BrowserRouter, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import AllItems from "./AllItems.jsx";
 import ItemDetails from "./ItemDetails.jsx";
-import Login from "./Login.jsx";
-import Signup from "./Signup.jsx";
 import SignInSide from "./SignInSide.js";
+import SignUpSide from "./SignUpSide.js";
 import SellSide from "./SellSide.js";
 import Cart from "./Cart.js";
 import Purchased from "./Purchased.js";
@@ -89,6 +88,12 @@ class App extends Component {
   renderUpdateItem = () => {
     return <SellSide />;
   };
+  renderSignIn = () => {
+    return <SignInSide />;
+  };
+  renderSignUp = () => {
+    return <SignUpSide />;
+  };
 
   render = () => {
     if (this.props.lgin) {
@@ -126,15 +131,12 @@ class App extends Component {
       );
     }
     return (
-      // <div className="signform">
-      //   <h1>Signup</h1>
-      //   <Signup />
-      //   <h1>Login</h1>
-      //   <Login />
-      // </div>
-      <div>
-        <SignInSide />
-      </div>
+      <BrowserRouter>
+        <div>
+          <Route exact={true} path="/" render={this.renderSignIn} />
+          <Route exact={true} path="/signup" render={this.renderSignUp} />
+        </div>
+      </BrowserRouter>
     );
   };
 }

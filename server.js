@@ -69,7 +69,9 @@ app.post("/signup", upload.none(), (req, res) => {
   dbo.collection("users").findOne({ username: username }, (err, user) => {
     if (err) {
       console.log("sign up error,", err);
-      res.send(JSON.stringify({ success: false }));
+      res.send(
+        JSON.stringify({ success: false, message: "create new user error" })
+      );
       return;
     }
     if (user !== null) {
@@ -365,7 +367,152 @@ app.post("/orderCheck", upload.none(), async (req, res) => {
   console.log("Cart in orderCheck endpoint, ", cart);
   res.send(JSON.stringify({ success: true }));
 });
-app.post("/charge", cors(), postCharge);
+app.post("/charge", cors(), async (req, res) => {
+  // check if inventories can fullfil the order requirement
+  // orderCheckfunc(req,res);
+  console.log("in the orderCheck endpoiunt");
+  const sessionId = req.cookies.sid;
+  const user = sessions[sessionId];
+  const userId = user.userId;
+  const username = user.username;
+  const inventory = dbo.collection("inventory");
+  const carts = dbo.collection("carts");
+  const orders = dbo.collection("orders");
+  console.log("User ID ", userId);
+  let cart = await carts.findOne({ userId: String(userId), state: "active" });
+  let success = [];
+  let failed = [];
+  let charge = null;
+
+  for (let i = 0; i < cart.products.length; i++) {
+    let product = cart.products[i];
+    let result = null;
+
+    try {
+      result = await inventory.findOneAndUpdate(
+        {
+          _id: ObjectID(product._id),
+          quantity: { $gte: parseInt(product.quantity) }
+        },
+        {
+          $inc: { quantity: -parseInt(product.quantity) },
+          $push: {
+            reservations: {
+              quantity: parseInt(product.quantity),
+              _id: cart._id,
+              createdOn: new Date()
+            }
+          }
+        }
+      );
+    } catch (err) {
+      console.log("error ", err);
+    }
+    console.log(
+      "results after updating the inventory with reservations ",
+      result
+    );
+    if (result.lastErrorObject.updatedExisting) success.push(product);
+    else failed.push(product);
+  }
+  console.log("Success array: ", success);
+  console.log("Failed array,", failed);
+  //if there are any products in the failed array, we need to rollback all the successful reservations into the
+  //inventories collection.
+  if (failed.length > 0) {
+    for (let i = 0; i < success.length; i++) {
+      let result = null;
+      try {
+        result = await inventory.findOneAndUpdate(
+          {
+            _id: ObjectID(success[i]._id),
+            "reservations._id": cart._id
+          },
+          {
+            $inc: { quantity: parseInt(success[i].quantity) },
+            $pull: { reservations: { _id: cart._id } }
+          },
+          { returnOriginal: false }
+        );
+      } catch (err) {
+        console.log("error, ", err);
+      }
+      console.log("results after rollback the inventories", result);
+    }
+    // res.send(JSON.stringify({ success: false }));
+    res.status(500).json({
+      message: "inventories cannot be reserved."
+    });
+    return;
+  }
+
+  // do the charge for the order
+  //postCharge(req, res);
+  try {
+    const { amount, source, receipt_email } = req.body;
+
+    charge = await stripe.charges.create({
+      amount,
+      currency: "usd",
+      source,
+      receipt_email
+    });
+
+    if (!charge) throw new Error("charge unsuccessful");
+
+    // not respone here, if charge succeesfully
+    // res.status(200).json({
+    //   message: "charge posted successfully",
+    //   charge
+    // });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+
+  // if charge success, then add the order and clear the cart;
+  orders.insertOne({
+    created_on: new Date(),
+    userId: userId,
+    shipping: {
+      name: username,
+      address: "Some street 1, NY 11223"
+    },
+    payment: {
+      method: "visa",
+      transaction_id: "231221441XXXTD"
+    },
+    products: cart.products
+  });
+
+  carts.findOneAndUpdate(
+    {
+      _id: ObjectID(cart._id),
+      state: "active"
+    },
+    {
+      $set: { state: "completed" }
+    }
+  );
+
+  inventory.updateMany(
+    {
+      "reservations._id": cart._id
+    },
+    {
+      $pull: { reservations: { _id: cart._id } }
+    },
+    { upsert: false }
+  );
+
+  //  res.send(JSON.stringify({ success: true }));
+
+  res.status(200).json({
+    message: "charge posted successfully",
+    charge
+  });
+});
 
 async function postCharge(req, res) {
   try {

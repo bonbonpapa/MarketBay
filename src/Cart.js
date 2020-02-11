@@ -157,17 +157,6 @@ export default function Cart() {
           </List>
           <div>
             <Button
-              onClick={handleCheckout}
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.checkout}
-            >
-              Checkout
-            </Button>
-          </div>
-          <div>
-            <Button
               fullWidth
               variant="contained"
               color="primary"
@@ -175,7 +164,7 @@ export default function Cart() {
               component={Link}
               to={"/stepcheck"}
             >
-              Purchase
+              Proceed to Checkout
             </Button>
           </div>
         </Paper>

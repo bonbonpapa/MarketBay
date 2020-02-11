@@ -53,13 +53,27 @@ export default function Review({ onSubmit, handleBackCall }) {
   const handleSubmit = async event => {
     event.preventDefault();
 
-    const order = await axios.post("/charge", {
-      amount: totalAmount.toString().replace(".", ""),
+    // let response = await fetch("/orderCheck", { method: "POST" });
+    // let body = await response.text();
+    // body = JSON.parse(body);
+    // if (body.success) {
+    //   alert("check out successfully");
+    //   dispatch({ type: "clear-shoppinglist" });
+    // } else {
+    //   alert("something went wrong");
+    // }
+
+    let response = await axios.post("/charge", {
+      // amount: totalAmount.toString().replace(".", ""),
+      amount: totalAmount * 100,
       source: token.id,
       receipt_email: "customer@example.com"
     });
 
-    dispatch({ type: "set-order", payload: order });
+    const { charge } = response.data;
+
+    dispatch({ type: "set-order", payload: charge });
+    dispatch({ type: "clear-shoppinglist" });
 
     onSubmit();
   };

@@ -2,11 +2,15 @@ import React, { Component } from "react";
 import MediaItem from "./MediaItem.jsx";
 import styled from "styled-components";
 import { connect } from "react-redux";
+import Button from "@material-ui/core/Button";
 
 const Wrapper = styled.div`
   display: grid;
   grid-template-columns: 60% 1fr;
   grid-gap: 20px;
+`;
+const DescDetail = styled.h2`
+  text-transform: uppercase;
 `;
 
 class ItemDetails extends Component {
@@ -61,12 +65,16 @@ class ItemDetails extends Component {
           })}
         </div>
         <div>
-          <h2>{description}</h2>
+          <DescDetail>{description}</DescDetail>
           <h3>$ {price} CAD</h3>
           <h3>{inventory < 10 ? "Limited Quantity" : "Hot Sale"}</h3>
-          <button type="button" onClick={this.addtoShoppingList}>
+          <Button
+            onClick={this.addtoShoppingList}
+            variant="contained"
+            color="primary"
+          >
             Add to cart
-          </button>
+          </Button>
         </div>
       </Wrapper>
     );

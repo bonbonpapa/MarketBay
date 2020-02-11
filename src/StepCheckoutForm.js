@@ -15,19 +15,6 @@ import PaymentForm from "./PaymentForm.js";
 import Review from "./Review.js";
 import { useSelector } from "react-redux";
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {"Copyright © "}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
-
 const useStyles = makeStyles(theme => ({
   appBar: {
     position: "relative"
@@ -128,7 +115,7 @@ const StepCheckoutForm = () => {
                 {order ? (
                   <div>
                     <h2>Payment Successful!</h2>
-                    <a href={order.data.charge.receipt_url}>View Receipt</a>
+                    <a href={order.receipt_url}>View Receipt</a>
                     <Typography variant="subtitle1">Order number</Typography>
                   </div>
                 ) : (
@@ -138,20 +125,10 @@ const StepCheckoutForm = () => {
                 )}
               </div>
             ) : (
-              <div>
-                {getStepContent(activeStep)}
-                <div className={classes.buttons}>
-                  {activeStep !== 0 && (
-                    <Button onClick={handleBack} className={classes.button}>
-                      Back
-                    </Button>
-                  )}
-                </div>
-              </div>
+              <div>{getStepContent(activeStep)}</div>
             )}
           </div>
         </Paper>
-        <Copyright />
       </main>
     </div>
   );

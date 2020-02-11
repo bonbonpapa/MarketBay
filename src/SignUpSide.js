@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -14,11 +14,6 @@ import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
-import styled from "styled-components";
-
-const SignLink = styled(Link)`
-  text-decoration: none;
-`;
 
 function Copyright() {
   return (
@@ -66,7 +61,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function SignInSide() {
+function SignUpSide({ history }) {
   const classes = useStyles();
 
   const dispatch = useDispatch();
@@ -81,7 +76,7 @@ export default function SignInSide() {
     let data = new FormData();
     data.append("username", username);
     data.append("password", password);
-    let response = await fetch("/login", {
+    let response = await fetch("/signup", {
       method: "POST",
       body: data,
       credentials: "include"
@@ -92,8 +87,10 @@ export default function SignInSide() {
     console.log("parsed body", body);
     console.log("userID", body.userId);
 
+    history.push("/");
+
     if (!body.success) {
-      alert("login failed");
+      alert(body.message);
       return;
     }
     dispatch({
@@ -118,7 +115,7 @@ export default function SignInSide() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            Create a new account
           </Typography>
           <form className={classes.form} onSubmit={handleSubmit}>
             <TextField
@@ -154,11 +151,11 @@ export default function SignInSide() {
               color="primary"
               className={classes.submit}
             >
-              Sign In
+              Sign Up
             </Button>
             <Grid container>
               <Grid item>
-                <SignLink to="/signup">Don't have an account? Sign Up</SignLink>
+                <Link to="/">Already have an account? Sign In</Link>
               </Grid>
             </Grid>
             <Box mt={5}>
@@ -170,3 +167,4 @@ export default function SignInSide() {
     </Grid>
   );
 }
+export default withRouter(SignUpSide);

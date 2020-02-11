@@ -10,6 +10,17 @@ const ItemCard = styled(Card)`
     object-fit: cover;
   }
 `;
+const Desc = styled.div`
+  text-transform: uppercase;
+`;
+const Info = styled.div`
+  margin-left: 20px;
+`;
+const DetailLink = styled(Link)`
+  text-decoration: none;
+  color: black;
+  font-size: 1.1rem;
+`;
 
 class Item extends Component {
   render() {
@@ -19,15 +30,14 @@ class Item extends Component {
         <div>
           <img src={defaultPaths.frontendPath} />
         </div>
-        <div>
-          <div>{description}</div>
-          <div>{price} $</div>
+        <Info>
           <div>
-            <Link to={"/details/" + this.props.contents._id}>
-              Link to details
-            </Link>
+            <DetailLink to={"/details/" + this.props.contents._id}>
+              <Desc>{description}</Desc>
+            </DetailLink>
           </div>
-        </div>
+          <div>{price} $</div>
+        </Info>
       </ItemCard>
     );
   }
