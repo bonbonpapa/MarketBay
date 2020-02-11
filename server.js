@@ -276,10 +276,10 @@ app.post("/orderCheck", upload.none(), async (req, res) => {
       result = await inventory.findOneAndUpdate(
         {
           _id: ObjectID(product._id),
-          quantity: { $gte: parseInt(product.quantity) }
+          inventory: { $gte: parseInt(product.quantity) }
         },
         {
-          $inc: { quantity: -parseInt(product.quantity) },
+          $inc: { inventory: -parseInt(product.quantity) },
           $push: {
             reservations: {
               quantity: parseInt(product.quantity),
@@ -313,7 +313,7 @@ app.post("/orderCheck", upload.none(), async (req, res) => {
             "reservations._id": cart._id
           },
           {
-            $inc: { quantity: parseInt(success[i].quantity) },
+            $inc: { inventory: parseInt(success[i].quantity) },
             $pull: { reservations: { _id: cart._id } }
           },
           { returnOriginal: false }
@@ -392,10 +392,10 @@ app.post("/charge", cors(), async (req, res) => {
       result = await inventory.findOneAndUpdate(
         {
           _id: ObjectID(product._id),
-          quantity: { $gte: parseInt(product.quantity) }
+          inventory: { $gte: parseInt(product.quantity) }
         },
         {
-          $inc: { quantity: -parseInt(product.quantity) },
+          $inc: { inventory: -parseInt(product.quantity) },
           $push: {
             reservations: {
               quantity: parseInt(product.quantity),
@@ -429,7 +429,7 @@ app.post("/charge", cors(), async (req, res) => {
             "reservations._id": cart._id
           },
           {
-            $inc: { quantity: parseInt(success[i].quantity) },
+            $inc: { inventory: parseInt(success[i].quantity) },
             $pull: { reservations: { _id: cart._id } }
           },
           { returnOriginal: false }
